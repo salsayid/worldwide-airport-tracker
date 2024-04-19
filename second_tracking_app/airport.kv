@@ -1,0 +1,203 @@
+<ScreenManagement>:
+    MainMenuScreen:
+    NewAirportScreen:
+    NewCityScreen:
+    CheckForecastScreen:
+
+<MainMenuScreen>:
+    name: 'main'
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0, 0, 0, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Image:
+            source: 'png/airportpic.png'
+            size_hint: 1, .6
+            allow_stretch: True
+            keep_ratio: False
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 1, .4
+            padding: 10
+            spacing: 10
+
+            Label:
+                text: "Airport Tracker System"
+                font_size: '24sp'
+                size_hint_y: None
+                height: '48dp'
+                color: 1, 1, 1, 1
+
+            Button:
+                text: 'New Airport'
+                on_press: root.manager.current = 'new_airport'
+                background_color: (0.1, 0.5, 0.8, 1)
+                color: (1, 1, 1, 1)
+                size_hint_y: None
+                height: '40dp'
+
+            Button:
+                text: 'New City'
+                on_press: root.manager.current = 'new_city'
+                background_color: (0.2, 0.6, 0.2, 1)
+                color: (1, 1, 1, 1)
+                size_hint_y: None
+                height: '40dp'
+
+            Button:
+                text: 'Check Forecast'
+                on_press: root.manager.current = 'check_forecast'
+                background_color: (0.7, 0.2, 0.2, 1)
+                color: (1, 1, 1, 1)
+                size_hint_y: None
+                height: '40dp'
+
+
+<NewAirportScreen>:
+    name: 'new_airport'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 40, 20, 40]
+        spacing: 15
+
+        Image:
+            source: 'png/Airportkv.png'
+            allow_stretch: True
+            keep_ratio: True
+            size_hint: 1, .7
+        TextInput:
+            id: airport_name
+            hint_text: 'Airport Name'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: airport_code
+            hint_text: 'ICAO Code'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: airport_location
+            hint_text: 'Location'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        Button:
+            text: 'Create Airport'
+            on_press: root.create_airport(airport_name.text, airport_code.text, airport_location.text)
+            background_color: (0, 0.5, 0.8, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: '50dp'
+
+        Button:
+            text: 'Back to Main Menu'
+            on_press: root.manager.current = 'main'
+            background_color: (0.3, 0.3, 0.3, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: '50dp'
+
+<NewCityScreen>:
+    name: 'new_city'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 40, 20, 40]
+        spacing: 15
+
+
+        Image:
+            source: 'png/NewCitykv.png'
+            allow_stretch: True
+            keep_ratio: True
+            size_hint: 1, .7
+        TextInput:
+            id: city_name
+            hint_text: 'City Name'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: city_entity
+            hint_text: 'Encompassing Entity (Country/State)'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: city_location
+            hint_text: 'Location'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        Button:
+            text: 'Create City'
+            on_press: root.create_city(city_name.text, city_entity.text, city_location.text)
+            background_color: (0, 0.5, 0.8, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: '50dp'
+
+        Button:
+            text: 'Back to Main Menu'
+            on_press: root.manager.current = 'main'
+            background_color: (0.3, 0.3, 0.3, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: '50dp'
+
+<CheckForecastScreen>:
+    name: 'check_forecast'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 40, 20, 40]
+        spacing: 15
+
+
+        Image:
+            source: 'png/ForecastKV.png'
+            allow_stretch: True
+            keep_ratio: True
+            size_hint: 1, .7
+
+        TextInput:
+            id: icao_code
+            hint_text: 'Enter ICAO Code'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: forecast_date
+            hint_text: 'Enter Date (YYYY-MM-DD)'
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        Button:
+            text: 'Get Forecast'
+            on_press: root.get_forecast(icao_code.text, forecast_date.text)
+            background_color: (0, 0.5, 0.8, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: '50dp'
+
+        Button:
+            text: 'Back to Main Menu'
+            on_press: root.manager.current = 'main'
+            background_color: (0.3, 0.3, 0.3, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: '50dp'
