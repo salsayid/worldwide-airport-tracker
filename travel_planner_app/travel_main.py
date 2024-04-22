@@ -19,7 +19,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from database import TravelPlannerDatabase
 
-class TravelScreen(Screen):
+class MainScreen(Screen):
     pass
 
 class TravelPlannerApp(App):
