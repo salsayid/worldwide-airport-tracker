@@ -3,6 +3,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from datetime import datetime
 from airport import Airport, City, Forecast, AirportDatabase
+import credentials as cred
 
 class ScreenManagement(ScreenManager):
     pass
@@ -54,7 +55,7 @@ class CheckForecastScreen(Screen):
 
 class AirportApp(App):
     def build(self):
-        url = AirportDatabase.construct_mysql_url('localhost', 3306, 'salsayid2', 'salsayid2', 'cho1ooWaew9u')
+        url = AirportDatabase.construct_mysql_url('localhost', cred.PORT, cred.DATABASE_NAME, cred.USERNAME, cred.PASSWORD)
         db = AirportDatabase(url)
         session = db.create_session()
         db.ensure_tables_exist()
