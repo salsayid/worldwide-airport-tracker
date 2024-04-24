@@ -1,25 +1,26 @@
-import json
-from datetime import datetime, date, timedelta
-
-
-from sys import stderr
-
-import sqlalchemy
-import requests
 from kivy.app import App
-from kivy.core.text import Label
 from kivy.core.window import Window
 from kivy.modules import inspector
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.screenmanager import Screen, ScreenManager
-from pip._internal.network import session
-from sqlalchemy.exc import SQLAlchemyError
+from kivy.uix.screenmanager import Screen
 
 from database import FinalDatabase
 
-class MainScreen(Screen):
+class StartUpScreen(Screen):
+    pass
+
+class LoadingScreen(Screen):
+    pass
+
+class MainMenuScreen(Screen):
+    pass
+
+class ValidateLocationsScreen(Screen):
+    pass
+
+class UpdateRatingsScreen(Screen):
+    pass
+
+class PrepareItineraryScreen(Screen):
     pass
 
 class TravelPlannerApp(App):
