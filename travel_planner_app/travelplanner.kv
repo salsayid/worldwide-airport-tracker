@@ -1,8 +1,107 @@
 ScreenManager:
-    MainScreen:
+    StartUpScreen:
+    LoadingScreen:
+    MainMenuScreen:
+    ValidateLocationsScreen:
+    UpdateRatingsScreen:
+    PrepareItineraryScreen:
 
-<MainScreen>:
-    name: 'Main'
+<StartUpScreen>:
+    name: 'startup'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Please enter the database credentials'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Authority:'
+                TextInput:
+                    font_size: '25sp'
+                    multiline: False
+                    padding: (10,67.5,0,0)
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Port Number:'
+                TextInput:
+                    font_size: '25sp'
+                    multiline: False
+                    padding: (10,67.5,0,0)
+                    input_filter: 'int'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Database Name:'
+                TextInput:
+                    font_size: '25sp'
+                    multiline: False
+                    padding: (10,67.5,0,0)
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Username:'
+                TextInput:
+                    font_size: '25sp'
+                    multiline: False
+                    padding: (10,67.5,0,0)
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Password:'
+                TextInput:
+                    font_size: '25sp'
+                    multiline: False
+                    padding: (10,67.5,0,0)
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: ''
+                Button:
+                    text: 'Submit'
+                    font_size: '25sp'
+                    on_press: app.root.current = 'LoadingScreen'
+
+<LoadingScreen>:
+    name: 'LoadingScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: 'Travel Planner'
+
+<MainMenuScreen>:
+    name: 'MainMenuScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: 'Travel Planner'
+
+<ValidateLocationsScreen>:
+    name: 'ValidateLocationsScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: 'Travel Planner'
+
+<UpdateRatingsScreen>:
+    name: 'UpdateRatingsScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: 'Travel Planner'
+
+<PrepareItineraryScreen>:
+    name: 'PrepareItineraryScreen'
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
