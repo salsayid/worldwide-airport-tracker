@@ -136,7 +136,7 @@ class CheckForecastScreen(Screen):
         venue_names = []
         venues = session.query(Venue).all()
         for venue in venues:
-            venue_info = f"Name: {venue.name}\nLocation: {venue.venue_lat}, {venue.venue_lon}\nType: {venue.type}"
+            venue_info = f"Name: {venue.name} | Location: {venue.venue_lat}, {venue.venue_lon} | Type: {venue.type}"
             venue_names.append(venue_info)
         return venue_names
     

@@ -1,96 +1,34 @@
 #:kivy 1.0.9
 
-<MyButton@Button>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-
-<MyLabel@Label>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-
 
 <StringTextInput@TextInput>:
     multiline: False
-    foreground_color: 1, 0, 0, 1
-    background_color: 0, 0, 0, 0
-    padding:  [10, (self.height - self.line_height) / 2 - 0.5 * self.line_height]
-    font_size: 20
+    size_hint_y: None
+    height: '40dp'
     write_tab: False
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-
 
 <IntegerTextInput@TextInput>:
     multiline: False
     input_filter: 'int'
-    foreground_color: 1, 0, 0, 1
-    background_color: 0, 0, 0, 0
-    padding:  [10, (self.height - self.line_height) / 2 - 0.5 * self.line_height]
-    font_size: 20
+    size_hint_y: None
+    height: '40dp'
     write_tab: False
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
 
+<MyButton@Button>:
+    color:(1, 1, 1, 1)
+    size_hint_y: None
+    height: '50dp'
 
 <SpinnerInput@Spinner>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
+    size_hint_y: None
+    height: '40dp'
     option_cls: 'MySpinnerOption'
     dropdown_cls: 'MySpinnerDropdown'
 
-<SpinnerInputSmall@Spinner>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-    option_cls: 'MySpinnerOptionSmall'
-    dropdown_cls: 'MySpinnerDropdown'
-
 <MySpinnerOption@SpinnerOption>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
     background_color: 0, 0, 0, 1
     foreground_color: 1, 0, 0, 1
     padding: [10, (self.height - self.line_height) / 2 - 0.5 * self.line_height]
-    font_size: 20
-
-<MySpinnerOptionSmall@SpinnerOption>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-    background_color: 0, 0, 0, 1
-    foreground_color: 1, 0, 0, 1
-    padding: [10, (self.height - self.line_height) / 2 - 0.5 * self.line_height]
-    height: 100
     font_size: 20
 
 <MySpinnerDropdown@DropDown>:
@@ -101,18 +39,17 @@
     padding: [10, 10]
     font_size: 20
 
+<MyBoxLayout@BoxLayout>:
+    orientation: 'vertical'
+    padding: [20, 40, 20, 40]
+    spacing: 15
 
-<OnOffSwitch@Switch>:
-    canvas.before:
-        Color:
-            #rgba: 255, 255, 255, .25
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-
+<MyImage@Image>:
+    allow_stretch: True
+    keep_ratio: True
+    size_hint: 1, .7
 
 ########################################################################################################################################
-
 
 ScreenManager:
     MainScreen:
@@ -123,297 +60,199 @@ ScreenManager:
     CheckForecastScreen:
 ########################################################################################################################################
 
-
 <MainScreen>:
     name: 'Main'
     BoxLayout:
         orientation: 'vertical'
 
+        MyImage:
+            source: 'png/airportpic.png'
 
-        #Top bar
         BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Package Deal Tracker'
-            #MyLabel:
+            orientation: 'vertical'
+            size_hint: 1, .7
+            padding: 10
+            spacing: 10
 
+            Label:
+                text: "Package Deal Tracker"
+                font_size: '24sp'
+                size_hint_y: None
+                height: '48dp'
+                color: 1, 1, 1, 1
 
-        #MidSection
-        MyButton:
-            text:'New Venue Screen'
-            on_press: app.root.current = 'NewVenueScreen'
-        MyButton:
-            text:'Add Edit Operator Screen'
-            on_press: app.root.current = 'AddEditOperatorScreen'
-        MyButton:
-            text:'CheckForecastScreen'
-            on_press: app.root.current = 'CheckForecastScreen'
-
-
-        #Bottom Bar
-        BoxLayout:
-            orientation: 'horizontal'
             MyButton:
-                text: 'Quit'
-                on_press: root.exit_program()
-            MyLabel:
-                #Empty
-########################################################################################################################################
+                text: 'New Venue Screen'
+                on_press: root.manager.current = 'NewVenueScreen'
+                background_color: (0.1, 0.5, 0.8, 1)
 
+            MyButton:
+                text: 'Add/Edit Operator Screen'
+                on_press: root.manager.current = 'AddEditOperatorScreen'
+                background_color: (0.2, 0.6, 0.2, 1)
+
+            MyButton:
+                text: 'Check Forecast'
+                on_press: root.manager.current = 'CheckForecastScreen'
+                background_color: (0.7, 0.2, 0.2, 1)
+
+            MyButton:
+                text: 'Exit'
+                on_press: root.exit_program()
+                background_color: (0.3, 0.3, 0.3, 1)
+########################################################################################################################################
 
 <NewVenueScreen>:
     name: 'NewVenueScreen'
-    BoxLayout:
-        orientation: 'vertical'
+    MyBoxLayout:
 
-        #Top bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'New Venue Screen'
-            #MyLabel:
+        MyImage:
+            source: 'png/Airportkv.png'
 
-        #MidSection
-        #Venue Name
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Venue Name'
-            StringTextInput:
-                id: venue_name
+        StringTextInput:
+            id: venue_name
+            hint_text: 'Venue Name'
 
-        #Venue Location
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Venue Latitude'
-            StringTextInput:
-                id: venue_lat
+        IntegerTextInput:
+            id: venue_lat
+            hint_text: 'Venue Latitude'
 
-        #Venue Location
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Venue Longitude'
-            StringTextInput:
-                id: venue_lon
+        IntegerTextInput:
+            id: venue_lon
+            hint_text: 'Venue Longitude'
 
-        #Type Of Venue
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Type Of Venue'
-            SpinnerInput:
-                values: ('Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena')
-                id: venue_type
+        SpinnerInput:
+            id: venue_type
+            text: 'Type Of Venue'    
+            values: ('Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena')
 
-        #Bottom Bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Go to Main'
-                on_press: app.root.current = 'Main'
-            MyButton:
-                text: 'Create Venue'
-                on_press: root.createNewVenue()
+        MyButton:
+            text: 'Create Venue'
+            on_press: root.createNewVenue()
+            background_color: (0, 0.5, 0.8, 1)
 
+        MyButton:
+            text: 'Back to Main Menu'
+            on_press: root.manager.current = 'Main'
+            background_color: (0.3, 0.3, 0.3, 1)
 ############################################################################################################################################
-
 
 <AddEditOperatorScreen>:
     name: 'AddEditOperatorScreen'
-    BoxLayout:
-        orientation: 'vertical'
+    MyBoxLayout:
 
-        #Top bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Add or Edit Operator'
-            #MyLabel:
+        MyImage:
+            source: 'png/NewCitykv.png'
 
-        #MidSection
-        #Setting 1
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Add Operator'
-                on_press: app.root.current = 'AddOperatorScreen'
-            #IntegerTextInput:
+        MyButton:
+            text: 'Add Operator'
+            on_press: app.root.current = 'AddOperatorScreen'
+            background_color: (0, 0.5, 0.8, 1)
 
+        MyButton:
+            text: 'Edit Operator'
+            on_press: app.root.current = 'EditOperatorScreen'
+            background_color: (0, 0.5, 0.8, 1)
 
-        #Setting 2
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Edit Operator'
-                on_press: app.root.current = 'EditOperatorScreen'
-            #IntegerTextInput:
-
-        #Bottom Bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Go to Main'
-                on_press: app.root.current = 'Main'
-            MyLabel:
-                #Empty
-
+        MyButton:
+            text: 'Back to Main Menu'
+            on_press: root.manager.current = 'Main'
+            background_color: (0.3, 0.3, 0.3, 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 <AddOperatorScreen>:
     name: 'AddOperatorScreen'
-    BoxLayout:
-        orientation: 'vertical'
+    MyBoxLayout:
 
-        #Top bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Add Operator'
-            #MyLabel:
+        MyImage:
+            source: 'png/NewCitykv.png'
+        
+        StringTextInput:
+            id: operator_name
+            hint_text: 'Operator Name'
 
-        #MidSection
-        #Setting 1
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Operator Name'
-            StringTextInput:
-                id: operator_name
+        IntegerTextInput:
+            id: operator_rating
+            hint_text: 'Operator Rating'
 
+        MyButton:
+            text: 'Add Operator'
+            on_press: root.createNewOperator()
+            background_color: (0, 0.5, 0.8, 1)
 
-        #Setting 2
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Operator Rating'
-            IntegerTextInput:
-                id: operator_rating
-
-        #Bottom Bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Go back to Add or Edit Operator Screen'
-                on_press: app.root.current = 'AddEditOperatorScreen'
-            MyButton:
-                text: 'Add Operator'
-                on_press: root.createNewOperator()
-
-
+        MyButton:
+            text: 'Go back to Add or Edit Operator Screen'
+            on_press: app.root.current = 'AddEditOperatorScreen'
+            background_color: (0.3, 0.3, 0.3, 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 <EditOperatorScreen>:
     name: 'EditOperatorScreen'
-    BoxLayout:
-        orientation: 'vertical'
+    MyBoxLayout:
 
-        #Top bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Edit Operator'
-            MyButton:
-                size_hint_x: 3/8
-                text: 'Refresh Operator Names'
-                on_press: root.updateSpinner()
+        MyImage:
+            source: 'png/NewCitykv.png'
+        
+        MyButton:
+            text: 'Refresh Operator Names'
+            on_press: root.updateSpinner() 
+            background_color: (0, 0.5, 0.8, 1)
 
-        #MidSection
-        #Existing Operator's Name
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: "Existing Operator's Name"
-            SpinnerInput:
-                id: existing_operator_name
-                values: root.getOperatorNames()
+        SpinnerInput:
+            id: existing_operator_name
+            text: "Existing Operator's Name"
+            values: root.getOperatorNames()
 
-                
+        StringTextInput:
+            id: new_operator_name
+            hint_text: "Operator's New Name"
 
-        #New Operator's Name
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: "Operator's New Name"
-            StringTextInput:
-                id: new_operator_name
+        IntegerTextInput:
+            id: new_operator_rating
+            hint_text: "Operator's New Rating"
 
-        #New Operator's Rating
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: "Operator's New Rating"
-            IntegerTextInput:
-                id: new_operator_rating
+        MyButton:
+            text: 'Edit Operator'
+            on_press: root.editExistingOperator()
 
-        #Bottom Bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Go back to Add or Edit Operator Screen'
-                on_press: app.root.current = 'AddEditOperatorScreen'
-            MyButton:
-                text: 'Edit Operator'
-                on_press: root.editExistingOperator()
-
-
-
-
-
+        MyButton:
+            text: 'Go back to Add or Edit Operator Screen'
+            on_press: app.root.current = 'AddEditOperatorScreen'
+            background_color: (0.3, 0.3, 0.3, 1)
 ############################################################################################################################################
 
-
-#TODO
 <CheckForecastScreen>:
+
     name: 'CheckForecastScreen'
-    BoxLayout:
-        orientation: 'vertical'
+    MyBoxLayout:
 
-        #Top bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Choose A Venue'
-            MyButton:
-                size_hint_x: 3/8
-                text: 'Refresh Venue Locations'
-                on_press: root.updateSpinner()
+        MyImage:
+            source: 'png/ForecastKV.png'
 
-        #Setting 1
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Choose A Venue'
-            SpinnerInputSmall:
-                id: existing_venue_name
-                values: root.getVenueNames()
+        MyButton:
+            text: 'Refresh Venue Locations'
+            on_press: root.updateSpinner() 
+            background_color: (0, 0.5, 0.8, 1)
 
-        #Setting 2
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                text: 'Date For Forecast'
-            SpinnerInput:
-                id: date_for_forecast
-                values: root.generateNext7Days()
+        SpinnerInput:
+            id: existing_venue_name
+            text: 'Choose A Venue'
+            values: root.getVenueNames()
 
-        #Setting 3
-        BoxLayout:
-            orientation: 'horizontal'
-            MyLabel:
-                id: forecast_label
+        SpinnerInput:
+            id: date_for_forecast
+            values: root.generateNext7Days()
+            text: 'Date For Forecast'
+            values: root.generateNext7Days()
 
-        #Bottom Bar
-        BoxLayout:
-            orientation: 'horizontal'
-            MyButton:
-                text: 'Go to Main'
-                on_press: app.root.current = 'Main'
-            MyButton:
-                id:find_forecast_button
-                text: 'Find Forecast'
-                on_press: root.settupGetWeather()
+        MyButton:
+            text: 'Get Forecast'
+            on_press: root.settupGetWeather()
+            background_color: (0, 0.5, 0.8, 1)
 
+        MyButton:
+            text: 'Back to Main Menu'
+            on_press: root.manager.current = 'Main'
+            background_color: (0.3, 0.3, 0.3, 1)
 ############################################################################################################################################
 
