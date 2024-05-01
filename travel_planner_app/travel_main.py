@@ -7,7 +7,13 @@ from database import FinalDatabase
 
 
 class StartUpScreen(Screen):
-    pass
+    def submit_credentials(self):
+        try:
+            url = FinalDatabase.construct_mysql_url(self.ids.authority.text, int(self.ids.port_number.text), self.ids.database_name.text, self.ids.database_username.text, self.ids.database_password.text)
+            self.operator_database = FinalDatabase(url)
+            self.session = self.operator_database.create_session()
+        except SQLAlchemyError as exception:
+            print(exception)
 
 
 class LoadingScreen(Screen):

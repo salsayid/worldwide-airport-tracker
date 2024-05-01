@@ -32,6 +32,7 @@ ScreenManager:
                 Label:
                     text: 'Authority:'
                 TextInput:
+                    id: authority
                     text: 'localhost'
                     font_size: '18sp'
                     multiline: False
@@ -41,6 +42,7 @@ ScreenManager:
                 Label:
                     text: 'Port Number:'
                 TextInput:
+                    id: port_number
                     text: '3306'
                     font_size: '18sp'
                     multiline: False
@@ -51,6 +53,7 @@ ScreenManager:
                 Label:
                     text: 'Database Name:'
                 TextInput:
+                    id: database_name
                     text: 'database name'
                     font_size: '18sp'
                     multiline: False
@@ -60,6 +63,7 @@ ScreenManager:
                 Label:
                     text: 'Username:'
                 TextInput:
+                    id: database_username
                     text: 'username'
                     font_size: '18sp'
                     multiline: False
@@ -69,6 +73,7 @@ ScreenManager:
                 Label:
                     text: 'Password:'
                 TextInput:
+                    id: database_password
                     font_size: '18sp'
                     multiline: False
                     padding: (10,35,0,0)
@@ -81,6 +86,7 @@ ScreenManager:
                 Label:
                     text: 'Authority:'
                 TextInput:
+                    id: openweather_authority
                     text: 'api.openweathermap.org'
                     font_size: '18sp'
                     multiline: False
@@ -90,6 +96,7 @@ ScreenManager:
                 Label:
                     text: 'Port Number:'
                 TextInput:
+                    id: openweather_port_number
                     text: '443'
                     font_size: '18sp'
                     multiline: False
@@ -100,6 +107,7 @@ ScreenManager:
                 Label:
                     text: 'API Key:'
                 TextInput:
+                    id: openweather_key
                     font_size: '18sp'
                     multiline: False
                     padding: (10,35,0,0)
@@ -110,7 +118,9 @@ ScreenManager:
                 Button:
                     text: 'Submit'
                     font_size: '18sp'
-                    on_press: app.root.current = 'LoadingScreen'
+                    on_press:
+                        root.submit_credentials()
+                        app.root.current = 'LoadingScreen'
 
 <LoadingScreen>:
     name: 'LoadingScreen'
@@ -135,6 +145,7 @@ ScreenManager:
                 orientation: 'vertical'
                 padding: (20,40,20,40)
                 DataLabel:
+                    id: needing_validation
                     text: 'Cities needing validation: 0              Airports needing validation: 0\n\n\nOperators needed updating: 0          Venues needing updating: 0'
                     font_size: '18sp'
                     background_color: (1,1,1,1)

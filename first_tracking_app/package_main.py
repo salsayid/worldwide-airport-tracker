@@ -4,6 +4,7 @@ from json import dumps, loads
 from sys import stderr
 import os
 import sys
+import json
 
 # Third party imports
 from kivy.app import App
@@ -19,12 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import requests
 
 # Local application imports
-from milestone1db import Milestone1DataBase, Venue, Operator, Forecast, OperatorVenueRelation
-from rest import RESTConnection
-import credentials as cred
-
-
-#^ Kivy GUI Code and implementation
+from package_deal_db import PackageDealDb, Venue, Operator, Forecast, OperatorVenueRelation
 
 #~ this shows a popup when the button in new venue screen is clicked, potentially useful for error messages
 def show_popup(self, happened, message):
@@ -37,88 +33,99 @@ def show_popup(self, happened, message):
     close_button.bind(on_release=popup.dismiss)
     popup.open()
 
-
 class MainScreen(Screen):
     def exit_program(self):
         App.get_running_app().stop()
 
 class NewVenueScreen(Screen):
     def createNewVenue(self):
-        venue_name = self.ids.venue_name.text
-        venue_lat = self.ids.venue_lat.text
-        venue_lon = self.ids.venue_lon.text
-        venue_type = self.ids.venue_type.text
+        venue_name = self.ids.venue_name.text.strip()
+        venue_lat = self.ids.venue_lat.text.strip()
+        venue_lon = self.ids.venue_lon.text.strip()
+        venue_type = self.ids.venue_type.text.strip()
 
-        existing_venue = session.query(Venue).filter_by(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type).first()
-        if existing_venue:
-            show_popup(self, 'Failed', 'Failed to create new venue!\nCause: Venue with the same name, location, and type already exists.')
-        elif venue_name == '' or venue_lat == '' or venue_lon == '' or venue_type == '':
+        if venue_name == '' or venue_lat == '' or venue_lon == '' or venue_type == '':
             show_popup(self, 'Failed', 'Failed to create new venue!\nCause: All fields must be filled.')
         else:
-            try:
-                new_venue = Venue(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type)
-                session.add(new_venue)
-                session.commit()
-            except SQLAlchemyError as exception:
-                show_popup(self, 'Failed', f'Failed to create new venue!\nCause: {exception}')
+            existing_venue = session.query(Venue).filter_by(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type).first()
+            if existing_venue:
+                show_popup(self, 'Failed', 'Failed to create new venue!\nCause: Venue with the same name, location, and type already exists.')
             else:
-                show_popup(self, 'Success', 'New venue created!')
-                self.ids.venue_name.text = ''
-                self.ids.venue_lat.text = ''
-                self.ids.venue_lon.text = ''
-                self.ids.venue_type.text = ''
+                try:
+                    new_venue = Venue(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type)
+                    session.add(new_venue)
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to create new venue!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'New venue created!')
+                    self.ids.venue_name.text = ''
+                    self.ids.venue_lat.text = ''
+                    self.ids.venue_lon.text = ''
+                    self.ids.venue_type.text = ''
+                    
+    def clearNewVenueFields(self):
+        self.ids.venue_name.text = ''
+        self.ids.venue_lat.text = ''
+        self.ids.venue_lon.text = ''
+        self.ids.venue_type.text = ''
 
 class AddEditOperatorScreen(Screen):
     pass
 
 class AddOperatorScreen(Screen):
     def createNewOperator(self):
-        operator_name = self.ids.operator_name.text
-        operator_rating = self.ids.operator_rating.text
+        operator_name = self.ids.operator_name.text.strip()
+        operator_rating = self.ids.operator_rating.text.strip()
 
-        existing_operator = session.query(Operator).filter_by(name=operator_name).first()
-        if existing_operator:
-            show_popup(self, 'Failed', f'Failed to create new operator!\nCause: Operator with the same name already exists.')
-        elif operator_name == '' or operator_rating == '':
+        if operator_name == '' or operator_rating == '':
             show_popup(self, 'Failed', 'Failed to create new operator!\nCause: All fields must be filled.')
         else:
-            try:
-                new_operator = Operator(name=operator_name, average_rating=operator_rating)
-                session.add(new_operator)
-                session.commit()
-            except SQLAlchemyError as exception:
-                show_popup(self, 'Failed', f'Failed to create new operator!\nCause: {exception}')
+            existing_operator = session.query(Operator).filter_by(name=operator_name).first()
+            if existing_operator:
+                show_popup(self, 'Failed', f'Failed to create new operator!\nCause: Operator with the same name already exists.')
             else:
-                show_popup(self, 'Success', 'New operator created!')
-                self.ids.operator_name.text = ''
-                self.ids.operator_rating.text = ''
+                try:
+                    new_operator = Operator(name=operator_name, average_rating=operator_rating)
+                    session.add(new_operator)
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to create new operator!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'New operator created!')
+                    self.ids.operator_name.text = ''
+                    self.ids.operator_rating.text = ''
+                    
+    def clearAddOperatorFields(self):
+        self.ids.operator_name.text = ''
+        self.ids.operator_rating.text = ''
 
 class EditOperatorScreen(Screen):
     def editExistingOperator(self):
-        operator_name = self.ids.existing_operator_name.text
-        new_operator_name = self.ids.new_operator_name.text
-        operator_rating = self.ids.new_operator_rating.text
+        operator_name = self.ids.existing_operator_name.text.strip()
+        new_operator_name = self.ids.new_operator_name.text.strip()
+        operator_rating = self.ids.new_operator_rating.text.strip()
 
-        existing_operator = session.query(Operator).filter_by(name=operator_name).first()
-        if not existing_operator:
-            show_popup(self, 'Failed', f'Failed to edit operator!\nCause: Operator does not exist.')
-        elif new_operator_name == '' or operator_rating == '':
+        if operator_name == '' or new_operator_name == '' or operator_rating == '':
             show_popup(self, 'Failed', 'Failed to edit operator!\nCause: All fields must be filled.')
         else:
-            try:
-                existing_operator.name = new_operator_name
-                existing_operator.average_rating = operator_rating
-                session.commit()
-            except SQLAlchemyError as exception:
-                show_popup(self, 'Failed', f'Failed to edit operator!\nCause: {exception}')
+            existing_operator = session.query(Operator).filter_by(name=operator_name).first()
+            if not existing_operator:
+                show_popup(self, 'Failed', f'Failed to edit operator!\nCause: Operator does not exist.')
             else:
-                show_popup(self, 'Success', 'Operator edited!')
-                self.ids.existing_operator_name.text = ''
-                self.ids.new_operator_name.text = ''
-                self.ids.new_operator_rating.text = ''
-                self.ids.existing_operator_name.values = self.getOperatorNames()
-                
-                
+                try:
+                    existing_operator.name = new_operator_name
+                    existing_operator.average_rating = operator_rating
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to edit operator!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'Operator edited!')
+                    self.ids.existing_operator_name.text = ''
+                    self.ids.new_operator_name.text = ''
+                    self.ids.new_operator_rating.text = ''
+                    self.ids.existing_operator_name.values = self.getOperatorNames()
+
     def getOperatorNames(self):
         operator_names = []
         operators = session.query(Operator).all()
@@ -129,6 +136,11 @@ class EditOperatorScreen(Screen):
     
     def updateSpinner(self):
         self.ids.existing_operator_name.values = self.getOperatorNames()
+
+    def clearEditOperatorFields(self):
+        self.ids.existing_operator_name.text = ''
+        self.ids.new_operator_name.text = ''
+        self.ids.new_operator_rating.text = ''
 
 #TODO
 class CheckForecastScreen(Screen):
@@ -153,6 +165,23 @@ class CheckForecastScreen(Screen):
 
 
     #Forecast       
+    def get_forecast(self):
+        
+       # api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
+        
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={icao_code}&appid={api_key}"
+        try:
+            response = requests.get(url)
+            data = response.json()
+            if response.status_code == 200:
+                forecast = data["weather"][0]["description"]
+                print(f"Forecast for {icao_code} on {date_str}: {forecast}")
+            else:
+                print(f"Failed to fetch forecast. Status code: {response.status_code}")
+        except Exception as e:
+            print("An error occurred:", e)
+    
+    
     
     def settupGetWeather(self):
         try:
@@ -243,6 +272,10 @@ class CheckForecastScreen(Screen):
             show_popup(self, 'Success', 'Forecast saved to database!')
             
 
+class SubmitReviewScreen(Screen):
+    pass
+
+
 
 
 #^ MAIN RUNNER
@@ -252,8 +285,21 @@ class PackageDealApp(App):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
 
 if __name__ == '__main__':
-    url = Milestone1DataBase.construct_mysql_url('localhost', cred.PORT, cred.DATABASE_NAME, cred.USERNAME, cred.PASSWORD)
-    milestone_1_database = Milestone1DataBase(url)
-    session = milestone_1_database.create_session()
+    file_path = 'first_tracking_app/credentials.json'
+    with open(file_path, 'r') as file:
+        credential_information = json.load(file)
+    
+    
+    authority = credential_information['AUTHORITY']
+    port = credential_information['PORT']
+    database_name = credential_information['DATABASE_NAME']
+    username = credential_information['USERNAME']
+    password = credential_information['PASSWORD']
+    
+    url = PackageDealDb.construct_mysql_url(authority, port, database_name, username, password)
+    package_deal_db = PackageDealDb(url)
+    session = package_deal_db.create_session()
     app = PackageDealApp()
     app.run()
+    
+    

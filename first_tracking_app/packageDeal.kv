@@ -1,5 +1,5 @@
 #:kivy 1.0.9
-
+#color divided by 255
 
 <StringTextInput@TextInput>:
     multiline: False
@@ -18,12 +18,14 @@
     color:(1, 1, 1, 1)
     size_hint_y: None
     height: '50dp'
+    background_color: (0, 0.5, 0.8, 1)
 
 <SpinnerInput@Spinner>:
     size_hint_y: None
     height: '40dp'
     option_cls: 'MySpinnerOption'
     dropdown_cls: 'MySpinnerDropdown'
+    background_color: 70/255, 20/255, 200/255, .8
 
 <MySpinnerOption@SpinnerOption>:
     background_color: 0, 0, 0, 1
@@ -46,7 +48,7 @@
 
 <MyImage@Image>:
     allow_stretch: True
-    keep_ratio: True
+    keep_ratio: False
     size_hint: 1, .7
 
 ########################################################################################################################################
@@ -58,48 +60,46 @@ ScreenManager:
     AddOperatorScreen:
     EditOperatorScreen:
     CheckForecastScreen:
+    SubmitReviewScreen:
 ########################################################################################################################################
 
 <MainScreen>:
     name: 'Main'
-    BoxLayout:
-        orientation: 'vertical'
-
+    MyBoxLayout:
         MyImage:
-            source: 'png/airportpic.png'
+            source: 'png/MainImage.png'
 
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint: 1, .7
-            padding: 10
-            spacing: 10
+        Label:
+            text: "Package Deal Tracker"
+            font_size: '24sp'
+            size_hint_y: None
+            height: '48dp'
+            color: 1, 1, 1, 1
 
-            Label:
-                text: "Package Deal Tracker"
-                font_size: '24sp'
-                size_hint_y: None
-                height: '48dp'
-                color: 1, 1, 1, 1
+        MyButton:
+            text: 'New Venue Screen'
+            on_press: root.manager.current = 'NewVenueScreen'
+            background_color: (0.1, 0.5, 0.8, 1)
 
-            MyButton:
-                text: 'New Venue Screen'
-                on_press: root.manager.current = 'NewVenueScreen'
-                background_color: (0.1, 0.5, 0.8, 1)
+        MyButton:
+            text: 'Add/Edit Operator Screen'
+            on_press: root.manager.current = 'AddEditOperatorScreen'
+            background_color: (0.2, 0.6, 0.2, 1)
 
-            MyButton:
-                text: 'Add/Edit Operator Screen'
-                on_press: root.manager.current = 'AddEditOperatorScreen'
-                background_color: (0.2, 0.6, 0.2, 1)
+        MyButton:
+            text: 'Check Forecast'
+            on_press: root.manager.current = 'CheckForecastScreen'
+            background_color: (0.7, 0.2, 0.2, 1)
+        
+        MyButton:
+            text: 'Submit Review'
+            on_press: root.manager.current = 'SubmitReviewScreen'
+            background_color: (0.7, 0.2, 0.7, 1)
 
-            MyButton:
-                text: 'Check Forecast'
-                on_press: root.manager.current = 'CheckForecastScreen'
-                background_color: (0.7, 0.2, 0.2, 1)
-
-            MyButton:
-                text: 'Exit'
-                on_press: root.exit_program()
-                background_color: (0.3, 0.3, 0.3, 1)
+        MyButton:
+            text: 'Exit'
+            on_press: root.exit_program()
+            background_color: (0.3, 0.3, 0.3, 1)
 ########################################################################################################################################
 
 <NewVenueScreen>:
@@ -107,7 +107,7 @@ ScreenManager:
     MyBoxLayout:
 
         MyImage:
-            source: 'png/Airportkv.png'
+            source: 'png/VenueImage.png'
 
         StringTextInput:
             id: venue_name
@@ -129,11 +129,11 @@ ScreenManager:
         MyButton:
             text: 'Create Venue'
             on_press: root.createNewVenue()
-            background_color: (0, 0.5, 0.8, 1)
-
+            
         MyButton:
             text: 'Back to Main Menu'
             on_press: root.manager.current = 'Main'
+            on_press:root.clearNewVenueFields()
             background_color: (0.3, 0.3, 0.3, 1)
 ############################################################################################################################################
 
@@ -142,17 +142,15 @@ ScreenManager:
     MyBoxLayout:
 
         MyImage:
-            source: 'png/NewCitykv.png'
+            source: 'png/AddEditOperatorImage.png'
 
         MyButton:
             text: 'Add Operator'
             on_press: app.root.current = 'AddOperatorScreen'
-            background_color: (0, 0.5, 0.8, 1)
 
         MyButton:
             text: 'Edit Operator'
             on_press: app.root.current = 'EditOperatorScreen'
-            background_color: (0, 0.5, 0.8, 1)
 
         MyButton:
             text: 'Back to Main Menu'
@@ -165,7 +163,7 @@ ScreenManager:
     MyBoxLayout:
 
         MyImage:
-            source: 'png/NewCitykv.png'
+            source: 'png/AddOperatorImage.png'
         
         StringTextInput:
             id: operator_name
@@ -178,11 +176,11 @@ ScreenManager:
         MyButton:
             text: 'Add Operator'
             on_press: root.createNewOperator()
-            background_color: (0, 0.5, 0.8, 1)
 
         MyButton:
             text: 'Go back to Add or Edit Operator Screen'
             on_press: app.root.current = 'AddEditOperatorScreen'
+            on_press: root.clearAddOperatorFields()
             background_color: (0.3, 0.3, 0.3, 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -191,7 +189,7 @@ ScreenManager:
     MyBoxLayout:
 
         MyImage:
-            source: 'png/NewCitykv.png'
+            source: 'png/EditOperatorImage.png'
         
         MyButton:
             text: 'Refresh Operator Names'
@@ -218,6 +216,7 @@ ScreenManager:
         MyButton:
             text: 'Go back to Add or Edit Operator Screen'
             on_press: app.root.current = 'AddEditOperatorScreen'
+            on_press: root.clearEditOperatorFields()
             background_color: (0.3, 0.3, 0.3, 1)
 ############################################################################################################################################
 
@@ -227,7 +226,7 @@ ScreenManager:
     MyBoxLayout:
 
         MyImage:
-            source: 'png/ForecastKV.png'
+            source: 'png/CheckForecastImage.png'
 
         MyButton:
             text: 'Refresh Venue Locations'
@@ -248,7 +247,6 @@ ScreenManager:
         MyButton:
             text: 'Get Forecast'
             on_press: root.settupGetWeather()
-            background_color: (0, 0.5, 0.8, 1)
 
         MyButton:
             text: 'Back to Main Menu'
@@ -256,3 +254,40 @@ ScreenManager:
             background_color: (0.3, 0.3, 0.3, 1)
 ############################################################################################################################################
 
+<SubmitReviewScreen>:
+    name: 'SubmitReviewScreen'
+    MyBoxLayout:
+
+        MyImage:
+            source: 'png/NewCitykv.png'
+        
+        MyButton:
+            text: 'Refresh Operator Names'
+            #on_press: root.updateSpinner() 
+            background_color: (0, 0.5, 0.8, 1)
+
+        SpinnerInput:
+            id: existing_operator_name
+            text: "Existing Operator's Name"
+            #values: root.getOperatorNames()
+
+        StringTextInput:
+            id: new_operator_name
+            hint_text: "Operator's New Name"
+
+        IntegerTextInput:
+            id: new_operator_rating
+            hint_text: "Operator's New Rating"
+
+        MyButton:
+            text: 'Edit Operator'
+            #on_press: root.editExistingOperator()
+
+        MyButton:
+            text: 'Go back to Add or Edit Operator Screen'
+            #on_press: app.root.current = 'AddEditOperatorScreen'
+            background_color: (0.3, 0.3, 0.3, 1)
+
+
+
+############################################################################################################################################
