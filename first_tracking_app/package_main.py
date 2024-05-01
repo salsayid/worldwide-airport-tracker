@@ -20,7 +20,10 @@ from sqlalchemy.exc import SQLAlchemyError
 import requests
 
 # Local application imports
-from package_deal_db import PackageDealDb, Venue, Operator, Forecast, OperatorVenueRelation
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from installer.database import FinalDatabase, Forecast, Operator, Venue
+
+
 
 #~ this shows a popup when the button in new venue screen is clicked, potentially useful for error messages
 def show_popup(self, happened, message):
@@ -47,12 +50,12 @@ class NewVenueScreen(Screen):
         if venue_name == '' or venue_lat == '' or venue_lon == '' or venue_type == '':
             show_popup(self, 'Failed', 'Failed to create new venue!\nCause: All fields must be filled.')
         else:
-            existing_venue = session.query(Venue).filter_by(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type).first()
+            existing_venue = session.query(Venue).filter_by(name=venue_name, latitude=venue_lat, longitude=venue_lon, type=venue_type).first()
             if existing_venue:
                 show_popup(self, 'Failed', 'Failed to create new venue!\nCause: Venue with the same name, location, and type already exists.')
             else:
                 try:
-                    new_venue = Venue(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type)
+                    new_venue = Venue(name=venue_name, latitude=venue_lat, longitude=venue_lon, type=venue_type)
                     session.add(new_venue)
                     session.commit()
                 except SQLAlchemyError as exception:
@@ -62,13 +65,13 @@ class NewVenueScreen(Screen):
                     self.ids.venue_name.text = ''
                     self.ids.venue_lat.text = ''
                     self.ids.venue_lon.text = ''
-                    self.ids.venue_type.text = ''
+                    self.ids.venue_type.text = 'Type Of Venue'
                     
     def clearNewVenueFields(self):
         self.ids.venue_name.text = ''
         self.ids.venue_lat.text = ''
         self.ids.venue_lon.text = ''
-        self.ids.venue_type.text = ''
+        self.ids.venue_type.text = 'Type Of Venue'
 
 class AddEditOperatorScreen(Screen):
     pass
@@ -121,7 +124,7 @@ class EditOperatorScreen(Screen):
                     show_popup(self, 'Failed', f'Failed to edit operator!\nCause: {exception}')
                 else:
                     show_popup(self, 'Success', 'Operator edited!')
-                    self.ids.existing_operator_name.text = ''
+                    self.ids.existing_operator_name.text = "Existing Operator's Name"
                     self.ids.new_operator_name.text = ''
                     self.ids.new_operator_rating.text = ''
                     self.ids.existing_operator_name.values = self.getOperatorNames()
@@ -138,7 +141,7 @@ class EditOperatorScreen(Screen):
         self.ids.existing_operator_name.values = self.getOperatorNames()
 
     def clearEditOperatorFields(self):
-        self.ids.existing_operator_name.text = ''
+        self.ids.existing_operator_name.text = "Existing Operator's Name"
         self.ids.new_operator_name.text = ''
         self.ids.new_operator_rating.text = ''
 
@@ -148,7 +151,7 @@ class CheckForecastScreen(Screen):
         venue_names = []
         venues = session.query(Venue).all()
         for venue in venues:
-            venue_info = f"Name: {venue.name} | Location: {venue.venue_lat}, {venue.venue_lon} | Type: {venue.type}"
+            venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
             venue_names.append(venue_info)
         return venue_names
     
@@ -164,7 +167,8 @@ class CheckForecastScreen(Screen):
         return date_formatted_7_days
 
 
-    #Forecast       
+    #Forecast    
+    '''   
     def get_forecast(self):
         
        # api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
@@ -271,7 +275,7 @@ class CheckForecastScreen(Screen):
         else:
             show_popup(self, 'Success', 'Forecast saved to database!')
             
-
+    '''
 class SubmitReviewScreen(Screen):
     pass
 
@@ -285,10 +289,10 @@ class PackageDealApp(App):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
 
 if __name__ == '__main__':
-    file_path = 'first_tracking_app/credentials.json'
+    parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    file_path = os.path.join(parent_directory, 'credentials.json')
     with open(file_path, 'r') as file:
         credential_information = json.load(file)
-    
     
     authority = credential_information['AUTHORITY']
     port = credential_information['PORT']
@@ -296,8 +300,8 @@ if __name__ == '__main__':
     username = credential_information['USERNAME']
     password = credential_information['PASSWORD']
     
-    url = PackageDealDb.construct_mysql_url(authority, port, database_name, username, password)
-    package_deal_db = PackageDealDb(url)
+    url = FinalDatabase.construct_mysql_url(authority, port, database_name, username, password)
+    package_deal_db = FinalDatabase(url)
     session = package_deal_db.create_session()
     app = PackageDealApp()
     app.run()

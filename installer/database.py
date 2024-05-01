@@ -104,7 +104,18 @@ class FinalDatabase(object):
         Persisted.metadata.create_all(self.engine)
 
     def drop_all_tables(self):
-        Persisted.metadata.drop_all(self.engine)
+        try:
+            AirportCityRelation.__table__.drop(self.engine)
+            OperatorVenueRelationship.__table__.drop(self.engine)
+            Forecast.__table__.drop(self.engine)
+            Venue.__table__.drop(self.engine)
+            Operator.__table__.drop(self.engine)
+            City.__table__.drop(self.engine)
+            Airport.__table__.drop(self.engine)
+
+            #Persisted.metadata.drop_all(self.engine)
+        except Exception as e:
+            pass
 
     def create_session(self):
         return self.Session()

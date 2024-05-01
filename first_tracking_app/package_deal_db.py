@@ -67,34 +67,3 @@ class PackageDealDb(object):
 
     def create_session(self):
         return self.Session()
-    
-    # Yeet
-    
-    def create_new_venue(self, name, venue_lat, venue_lon, type):
-        venue = Venue(name=name, venue_lat=venue_lat, venue_lon=venue_lon, type=type)
-        self.session.add(venue)
-        self.session.commit()
-        return venue
-
-    def create_new_operator(self, name, average_rating):
-        operator = Operator(name=name, average_rating=average_rating)
-        self.session.add(operator)
-        self.session.commit()
-        return operator
-    
-    def edit_operator(self, operatorID, name, average_rating):
-        operator = self.session.query(Operator).filter(Operator.operatorID == operatorID).first()
-        operator.name = name
-        operator.average_rating = average_rating
-        self.session.commit()
-        return operator
-    
-    def store_forecast(self, date, forecastData, venueID):
-        forecast = Forecast(date=date, forecastData=forecastData, venueID=venueID)
-        self.session.add(forecast)
-        self.session.commit()
-        return forecast
-
-    def find_if_venue_exists(self, venue_name, venue_lat, venue_lon, venue_type):
-        venue = self.session.query(Venue).filter_by(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type).first()
-        return venue is not None
