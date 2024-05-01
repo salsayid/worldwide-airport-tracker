@@ -1,7 +1,7 @@
 from sys import stderr
 from datetime import date
 from sqlalchemy.exc import SQLAlchemyError
-from milestone1db import Milestone1DataBase, Venue, Operator, Forecast, OperatorVenueRelation
+from first_tracking_app.package_deal_db import Milestone1DataBase, Venue, Operator, Forecast, OperatorVenueRelation
 import credentials as cred
 
 

@@ -30,8 +30,11 @@ venv/
 .vscode
 
 #Credentials
-credentials.py
+credentials.json
 
 #Sql query
 jointable.sql
 select.sql
+
+#Testing File
+testfile.txt
