@@ -4,11 +4,8 @@ from sys import stderr
 import requests
 from sqlalchemy.exc import SQLAlchemyError
 from database import FinalDatabase, Airport, City, Forecast, Operator, Venue
-
 import os
 import json
-
-
 
 
 def add_starter_data(session):
@@ -51,15 +48,18 @@ def add_starter_data(session):
     session.add(forecast6)
     
     #Airport App
+    
+    
+    
+    #TODO Add airport data here, idk the format of the data so I can't add it
 
 
 def main():
     try:
         parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        file_path = os.path.join(parent_directory, 'credentials.json')
+        file_path = os.path.join(parent_directory, "installer", "credentials.json")
         with open(file_path, 'r') as file:
             credential_information = json.load(file)
-        
         authority = credential_information['AUTHORITY']
         port = credential_information['PORT']
         database_name = credential_information['DATABASE_NAME']

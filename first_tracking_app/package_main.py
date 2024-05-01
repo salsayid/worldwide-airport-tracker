@@ -289,21 +289,22 @@ class PackageDealApp(App):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
 
 if __name__ == '__main__':
-    parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    file_path = os.path.join(parent_directory, 'credentials.json')
-    with open(file_path, 'r') as file:
-        credential_information = json.load(file)
-    
-    authority = credential_information['AUTHORITY']
-    port = credential_information['PORT']
-    database_name = credential_information['DATABASE_NAME']
-    username = credential_information['USERNAME']
-    password = credential_information['PASSWORD']
+    try:
+        parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        file_path = os.path.join(parent_directory, "installer", "credentials.json")
+        with open(file_path, 'r') as file:
+            credential_information = json.load(file)
+        authority = credential_information['AUTHORITY']
+        port = credential_information['PORT']
+        database_name = credential_information['DATABASE_NAME']
+        username = credential_information['USERNAME']
+        password = credential_information['PASSWORD']
+    except FileNotFoundError:
+        print('Could not find credentials.json file!', file=stderr)
+        exit(1)
     
     url = FinalDatabase.construct_mysql_url(authority, port, database_name, username, password)
     package_deal_db = FinalDatabase(url)
     session = package_deal_db.create_session()
     app = PackageDealApp()
     app.run()
-    
-    
