@@ -14,7 +14,7 @@ def add_starter_data(session):
     operator1 = Operator(name='Test Jeffery Danger', average_rating=5)
     session.add(operator1)
 
-    operator2 = Operator(name='Test Stephan Hawkson', average_rating=5)
+    operator2 = Operator(name='Test Stephan Hawkson', average_rating=5, reviews='3,4,5,6,7')
     session.add(operator2)
 
     restaurant = Venue(name=' Test Indoor Restaurant', latitude='40.8207', longitude='-96.7005',
@@ -22,7 +22,7 @@ def add_starter_data(session):
     session.add(restaurant)
 
     theater = Venue(name='Test Indoor Theater', latitude='40.8207', longitude='-96.7005', type='Indoor Theater',
-                    operators=[operator1, operator2])
+                    operators=[operator1, operator2], average_rating=4.5, reviews='3,4,5,6,7')
     session.add(theater)
 
     sports_arena = Venue(name='Test Indoor Sports Arena', latitude='40.8207', longitude='-96.7005',

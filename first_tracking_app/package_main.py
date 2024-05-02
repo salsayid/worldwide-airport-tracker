@@ -24,8 +24,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from installer.database import FinalDatabase, Forecast, Operator, Venue
 
 
-
-#~ this shows a popup when the button in new venue screen is clicked, potentially useful for error messages
 def show_popup(self, happened, message):
     content = BoxLayout(orientation='vertical')
     label = Label(text=message, font_size=20, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
@@ -276,9 +274,114 @@ class CheckForecastScreen(Screen):
             show_popup(self, 'Success', 'Forecast saved to database!')
             
     '''
-class SubmitReviewScreen(Screen):
-    pass
 
+class SubmitReviewScreen(Screen):
+    
+    def getOperatorNames(self):
+        operator_names = []
+        operators = session.query(Operator).all()
+        for operator in operators:
+            operator_names.append(operator.name)
+        return operator_names
+    
+    def getVenueNames(self):
+        venue_names = []
+        venues = session.query(Venue).all()
+        for venue in venues:
+            venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
+            venue_names.append(venue_info)
+        return venue_names
+    
+    def updateSpinner(self):
+        self.ids.existing_operator_name.values = self.getOperatorNames()
+        self.ids.existing_venue_name.values = self.getVenueNames()
+        
+    def clearReviewFields(self):
+        self.ids.existing_operator_name.text = "Existing Operator's Name"
+        self.ids.existing_venue_name.text = "Existing Venue's Name"
+        self.ids.venue_review.text = ''
+        self.ids.operator_review.text = ''
+
+    def addOperatorReview(self):
+        try:
+            operator_name = self.ids.existing_operator_name.text
+            operator_review = self.ids.operator_review.text
+            
+            if operator_name == '' or operator_review == '':
+                show_popup(self, 'Failed', 'Failed to add operator review!\nCause: All fields must be filled.')
+            else:
+                try:
+                    existing_operator = session.query(Operator).filter_by(name=operator_name).first()
+                    
+                    if existing_operator.reviews is not None:
+                        review_list = existing_operator.reviews.split(',')
+                        review_list.append(operator_review)
+                        existing_operator.reviews = ','.join(review_list)
+                        
+                        average_rating = 0
+                        for review in review_list:
+                            average_rating += int(review[0])
+                            print (average_rating)
+                            
+                        existing_operator.average_rating = average_rating / len(review_list)
+                    else:
+                        existing_operator.reviews = operator_review
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to add operator review!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'Operator review added!')
+                    self.ids.existing_operator_name.text = "Existing Operator's Name"
+                    self.ids.operator_review.text = ''
+        except Exception as e:
+            show_popup(self, 'Failed', f'Failed to add operator review!\nCause: {e}')
+            self.ids.existing_operator_name.text = "Existing Operator's Name"
+            self.ids.operator_review.text = ''
+                
+    def addVenueReview(self):
+        try:
+            venue_name = self.ids.existing_venue_name.text
+            venue_review = self.ids.venue_review.text
+
+            if venue_name == '' or venue_review == '':
+                show_popup(self, 'Failed', 'Failed to add venue review!\nCause: All fields must be filled.')
+            else:
+                try:
+                    venues = session.query(Venue).all()
+                    current_venue = None
+                    for venue in venues:
+                        venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
+                        if venue_info == venue_name:
+                            current_venue = venue
+                            break
+                        
+                    existing_venue = session.query(Venue).filter_by(name=current_venue.name).first()
+                    
+                    if existing_venue.reviews is not None:
+                        review_list = existing_venue.reviews.split(',')
+                        review_list.append(venue_review)
+                        existing_venue.reviews = ','.join(review_list)
+                        
+                        average_rating = 0
+                        for review in review_list:
+                            average_rating += int(review[0])
+                            print (average_rating)
+                            
+                        existing_venue.average_rating = average_rating / len(review_list)
+                    else:
+                        existing_venue.reviews = venue_review
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to add venue review!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'Venue review added!')
+                    self.ids.existing_venue_name.text = "Existing Venue's Name"
+                    self.ids.venue_review.text = ''
+        except Exception as e:
+            show_popup(self, 'Failed', f'Failed to add venue review!\nCause: {e}')
+            self.ids.existing_venue_name.text = "Existing Venue's Name"
+            self.ids.venue_review.text = ''
+            
 
 
 

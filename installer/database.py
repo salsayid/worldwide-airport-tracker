@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Text, Float
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 import datetime
 
@@ -13,6 +13,8 @@ class Venue(Persisted):
     latitude = Column(String(256), nullable=False)
     longitude = Column(String(256), nullable=False)
     type = Column(String(50), nullable=False)
+    average_rating = Column(Float)
+    reviews = Column(Text)
 
     operatorID = Column(Integer, ForeignKey('operators.operatorID'))
 
@@ -25,7 +27,8 @@ class Operator(Persisted):
 
     operatorID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
-    average_rating = Column(Integer)
+    average_rating = Column(Float)
+    reviews = Column(Text)
 
     venues = relationship('Venue', back_populates='operators')
 
