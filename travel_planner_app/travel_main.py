@@ -2,6 +2,8 @@ import math
 import os
 import csv
 import time
+from datetime import datetime, timedelta
+
 import requests
 from kivy.app import App
 from kivy.core.window import Window
@@ -27,9 +29,15 @@ airport_names = []
 airport_codes = []
 airport_coords = []
 operator_names = []
+operator_reviews_names = ['Default']
 operator_scores = []
+operator_average = []
+operator_new_score = []
 venue_names = []
+venue_reviews_names = ['Default']
 venue_scores = []
+venue_average = []
+venue_new_score = []
 venue_types = []
 forecast_dates = []
 forecast_data = []
@@ -111,22 +119,31 @@ class StartUpScreen(Screen):
             operator_query = session.query(Operator).all()
             for operator in operator_query:
                 operator_names.append(operator.name)
-                operator_scores.append(operator.average_rating)
+                operator_average.append(operator.average_rating)
+                operator_scores.append(operator.num_reviews)
+                if operator.num_reviews:
+                    operator_reviews_names.append(operator.name)
 
             venue_query = session.query(Venue).all()
             for venue in venue_query:
                 venue_names.append(venue.name)
-                venue_scores.append(venue.average_rating)
                 venue_types.append(venue.type)
+                venue_average.append(venue.average_rating)
+                venue_scores.append(venue.reviews)
+                if venue.reviews:
+                    venue_reviews_names.append(venue.name)
 
             forecast_query = session.query(Forecast).all()
             for forecast in forecast_query:
                 forecast_dates.append(forecast.date)
                 forecast_data.append(forecast.forecastData)
 
+            self.ids.database_password.text = ""
+            self.ids.openweather_key.text = ""
             print("connection")
+            self.manager.current = 'LoadingScreen'
         except SQLAlchemyError:
-            print("no connection")
+            show_fail_popup(self, "No Connection", "No Connection\n\nPlease check the database or openweather fields")
 
 
 class LoadingScreen(Screen):
@@ -136,10 +153,12 @@ class LoadingScreen(Screen):
             city_num += 1
         for j in range(len(airport_names)):
             airport_num += 1
-        for y in range(len(operator_names)):
-            operator_num += 1
-        for z in range(len(venue_names)):
-            venue_num += 1
+        for y in range(len(operator_reviews_names)):
+            if operator_reviews_names[y] != "Default":
+                operator_num += 1
+        for z in range(len(venue_reviews_names)):
+            if venue_reviews_names[z] != "Default":
+                venue_num += 1
 
         time.sleep(2.5)
         self.manager.current = 'MainMenuScreen'
@@ -150,6 +169,12 @@ class MainMenuScreen(Screen):
         global city_num, airport_num, operator_num, venue_num
         string = f"Needing Validation:\n\nCities: {city_num}\nAirports: {airport_num}\n\nNeeding Updating:\n\nOperators: {operator_num}\nVenues: {venue_num}"
         self.ids.needing_validation.text = string
+
+    def exit_app(self):
+        App.get_running_app().stop()
+
+    def advance_calender(self):
+        pass
 
 
 class ValidateLocationsScreen(Screen):
@@ -216,7 +241,7 @@ class ValidateLocationsScreen(Screen):
                     new_info = f"New Info:\nName: {self.ids.ac_name.text}, Country: {city_country}\nLat: {city_lat}, Lon: {city_lon}"
                     show_choose_popup(self, "Choose Correct Information", data_info, new_info)
             else:
-                show_fail_popup(self, "Failure", "City cannot be validated")
+                show_fail_popup(self, "Failure", "No record\n\nCity cannot be validated\n\nPlease check your selection")
         elif self.ids.country.text == "":
             location = list(filter(lambda code: code['ICAO'] == self.ids.icao_code.text, data))
 
@@ -234,7 +259,7 @@ class ValidateLocationsScreen(Screen):
                     new_info = f"New Info:\nICAO Code: {icao}, Name: {self.ids.ac_name.text},\nLat: {latitude}, Lon: {longitude}"
                     show_choose_popup(self, "Choose Correct Information", data_info, new_info)
             else:
-                show_fail_popup(self, "Failure", "Airport cannot be validated")
+                show_fail_popup(self, "Failure", "No record\n\nAirport cannot be validated\n\nPlease check your selection")
 
     def refresh(self):
         self.ids.city_spinner.values = city_names
@@ -247,7 +272,75 @@ class ValidateLocationsScreen(Screen):
 
 
 class UpdateRatingsScreen(Screen):
-    pass
+    def refresh(self):
+        self.ids.operator_spinner.values = operator_reviews_names
+        self.ids.venue_spinner.values = venue_reviews_names
+        self.ids.ratings.text = 'Average Rating: 0\n\nNew Score: 0'
+
+    def update_operator_text(self):
+        if self.ids.operator_spinner.text == 'Default':
+            self.ids.ratings.text = 'Average Rating: 0\n\nNew Score: 0'
+        else:
+            query = session.query(Operator).filter(Operator.name == self.ids.operator_spinner.text).one()
+            average = query.average_rating
+            reviews = query.num_reviews
+            reviews_split = reviews.split(",")
+            new_review = reviews_split[len(reviews_split)-1]
+
+            self.ids.ratings.text = f"Average Rating: {average}\n\nNew Review: {new_review}"
+
+    def update_venue_text(self):
+        if self.ids.venue_spinner.text == 'Default':
+            self.ids.ratings.text = 'Average Rating: 0\n\nNew Score: 0'
+        else:
+            query = session.query(Venue).filter(Venue.name == self.ids.venue_spinner.text).one()
+            average = query.average_rating
+            reviews = query.reviews
+            reviews_split = reviews.split(",")
+            new_review = reviews_split[len(reviews_split) - 1]
+
+            self.ids.ratings.text = f"Average Rating: {average}\n\nNew Review: {new_review}"
+
+    def confirm_review(self):
+        if self.ids.venue_spinner.text == 'Default' or self.ids.venue_spinner.text == 'Select Venue':
+            o_query = session.query(Operator).filter(Operator.name == self.ids.operator_spinner.text).one()
+            o_average = o_query.average_rating
+            o_reviews = o_query.num_reviews
+            o_reviews_split = o_reviews.split(",")
+            new_o_review = o_reviews_split[len(o_reviews_split) - 1]
+            reviews_total = 0
+
+            for review in o_reviews_split:
+                reviews_total += int(review)
+            reviews_total += int(new_o_review)
+
+            o_average += float(reviews_total)
+            o_average /= float(len(o_reviews_split) + 1)
+            o_query.num_reviews += f",{new_o_review}"
+
+            o_query.average_rating = o_average
+
+            session.add(o_query)
+            session.commit()
+            show_validated_popup(self, "Review Accepted", "Review Accepted")
+        elif self.ids.operator_spinner.text == 'Default':
+            v_query = session.query(Venue).filter(Venue.name == self.ids.venue_spinner.text).one()
+            v_average = v_query.average_rating
+            v_reviews = v_query.reviews
+            v_reviews_split = v_reviews.split(",")
+            new_v_review = v_reviews_split[len(v_reviews_split) - 1]
+
+            v_average = (v_average + new_v_review)/len(v_reviews_split)+1
+            v_query.reviews = v_query.reviews + f",{new_v_review}"
+            v_query.average_rating = v_average
+
+            session.add(v_query)
+            session.commit()
+            show_validated_popup(self, "Review Accepted", "Review Accepted")
+
+    def reject_review(self):
+        self.ids.ratings.text = 'Average Rating: 0\n\nNew Score: 0'
+        show_fail_popup(self, "Review Rejected", 'Review Rejected')
 
 
 def calculate_distance(location1, location2):
