@@ -1,7 +1,13 @@
+import math
+from datetime import datetime, timedelta
+
+import requests
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.modules import inspector
+from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.screenmanager import Screen
+from sqlalchemy.exc import SQLAlchemyError
 
 from database import FinalDatabase
 
@@ -9,7 +15,9 @@ from database import FinalDatabase
 class StartUpScreen(Screen):
     def submit_credentials(self):
         try:
-            url = FinalDatabase.construct_mysql_url(self.ids.authority.text, int(self.ids.port_number.text), self.ids.database_name.text, self.ids.database_username.text, self.ids.database_password.text)
+            url = FinalDatabase.construct_mysql_url(self.ids.authority.text, int(self.ids.port_number.text),
+                                                    self.ids.database_name.text, self.ids.database_username.text,
+                                                    self.ids.database_password.text)
             self.operator_database = FinalDatabase(url)
             self.session = self.operator_database.create_session()
         except SQLAlchemyError as exception:
@@ -40,8 +48,6 @@ class PrepareItineraryScreen(Screen):
         self.current_location = location
         self.days_into_journey = day
 
-
-
     def calculate_distance(self, location1, location2):
         R = 6371
         lat1, lon1 = location1['latitude'], location1['longitude']
@@ -67,10 +73,13 @@ class PrepareItineraryScreen(Screen):
         except Exception as e:
             print("An error occurred:", e)
             return None
+
     def city_with_most_activities(self):
         pass
+
     def city_farthest_away(self):
         pass
+
     def city_in_range(self, cities, current_location):
         cites = []
         for city in cities:
@@ -87,6 +96,7 @@ class PrepareItineraryScreen(Screen):
         itinerary.append({'from': current_location['name'], 'to': next_location['name'],
                           'departure_date': datetime.now(), 'arrival_date': arrival_date})
         return itinerary
+
     def generate_itinerary_2(self, current_location, past_travel_data):
         itinerary = [past_travel_data]
         next_location = self.city_with_most_activities()
@@ -95,8 +105,15 @@ class PrepareItineraryScreen(Screen):
                           'departure_date': datetime.now(), 'arrival_date': arrival_date})
         return itinerary
 
+
 class ReviewItineraryScreen(Screen):
-    pass
+    itinerary_1 = generate_itinerary_1(current_location, past_travel_data)
+    itinerary_2 = generate_itinerary_1(current_location, past_travel_data)
+
+    def update_info(self, location, day):
+        self.current_location = location
+        self.days_into_journey = day
+
 
 class TravelPlannerApp(App):
     def build(self):
