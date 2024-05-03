@@ -28,10 +28,21 @@ class Operator(Persisted):
     operatorID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
     average_rating = Column(Float)
-    reviews = Column(Text)
+    reviews = relationship('Reviews', uselist=True, secondary='operator_reviews', back_populates='operators')
 
     venues = relationship('Venue', back_populates='operators')
 
+class Reviews(Persisted):
+    __tablename__ = 'reviews'
+    reviewID = Column(Integer, primary_key=True, autoincrement=True)
+    review = Column(String(256), nullable=False)
+    operators = relationship('Operator', uselist=True, secondary='operator_reviews', back_populates='reviews')
+
+class OperatorReviews(Persisted):
+    __tablename__ = 'operator_reviews'
+
+    reviewID = Column(Integer, ForeignKey('reviews.reviewID'), primary_key=True)
+    operatorID = Column(Integer, ForeignKey('operators.operatorID'), primary_key=True)
 
 class OperatorVenueRelationship(Persisted):
     __tablename__ = 'operator_venues'
