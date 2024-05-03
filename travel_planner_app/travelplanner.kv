@@ -392,46 +392,46 @@ ScreenManager:
                         app.root.current = 'MainMenuScreen'
 
 <ReviewItineraryScreen>:
-#    name: 'ReviewItineraryScreen'
-#    BoxLayout:
-#        orientation: 'vertical'
-#        BoxLayout:
-#            orientation: 'vertical'
-#            padding: (20,40,20,40)
-#            size_hint: (1, None)
-#            size: (0, 750)
-#            BoxLayout:
-#                orientation: 'vertical'
-#                Label:
-#                    text: 'Proposed Itineraries:'
-#                    font_size: '18sp'
-#                    size_hint_y: None
-#                    height: '30dp'
-#                Button:
-#                    text: 'Itinerary 1'
-#                    font_size: '16sp'
-#                    on_press:
-#                        root.select_itinerary(1)
-#                Label:
-#                    id: itinerary1
-#                    text: root.itinerary_1
-#                    font_size: '18sp'
-#                    size_hint_y: None
-#                    height: '30dp'
-#                Button:
-#                    text: 'Itinerary 2'
-#                    font_size: '16sp'
-#                    on_press:
-#                        root.select_itinerary(2)
-#                Label:
-#                    id: itinerary1
-#                    text: root.itinerary_2
-#                    font_size: '18sp'
-#                    size_hint_y: None
-#                    height: '30dp'
-#                Button:
-#                    text: 'Back'
-#                    font_size: '16sp'
-#                    on_press:
-#                        app.root.transition.direction = 'left'
-#                        app.root.current = 'PrepareItineraryScreen'
+    name: 'ReviewItineraryScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: (20,40,20,40)
+            size_hint: (1, None)
+            size: (0, 750)
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Proposed Itineraries:'
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Itinerary 1'
+                    font_size: '16sp'
+                    on_press:
+                        root.select_itinerary(1)
+                Label:
+                    id: itinerary1
+                    text: root.itinerary_1
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Itinerary 2'
+                    font_size: '16sp'
+                    on_press:
+                        root.select_itinerary(2)
+                Label:
+                    id: itinerary1
+                    text: root.itinerary_2
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Back'
+                    font_size: '16sp'
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'PrepareItineraryScreen'
