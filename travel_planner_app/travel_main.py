@@ -1,10 +1,13 @@
+import math
 import os
 import csv
+from datetime import datetime, timedelta
 
 import requests
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.modules import inspector
+from kivy.properties import NumericProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -27,6 +30,8 @@ airport_coords = []
 city_country = None
 city_lat = 0
 city_lon = 0
+current_location = ''
+past_travel_data = ''
 
 
 def show_popup(self, happened, message1, message2):
@@ -156,12 +161,61 @@ class UpdateRatingsScreen(Screen):
     pass
 
 
+def calculate_distance(location1, location2):
+    R = 6371
+    lat1, lon1 = location1['latitude'], location1['longitude']
+    lat2, lon2 = location2['latitude'], location2['longitude']
+    d = math.acos(math.sin(math.radians(lat1)) * math.sin(math.radians(lat2)) +
+                  math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+                  math.cos(math.radians(lon2 - lon1))) * R
+    return d
+
+
 class PrepareItineraryScreen(Screen):
-    pass
+    current_location = StringProperty('Lincoln, Nebraska')
+    days_into_journey = NumericProperty(0)
+
+    def update_info(self, location, day):        self.current_location = location
+
+        self.days_into_journey = day
+
+    def city_with_most_activities(self):
+        pass
+
+    def city_farthest_away(self):
+        pass
+
+    def city_in_range(self, cities, current_location):
+        cites = []
+        for city in cities:
+            for location in city:
+                if self._calculate_distance(current_location, location) < 15000:
+                    return True
+                else:
+                    return False
+
+
+def generate_itinerary_2(self, current_location, past_travel_data):
+    itinerary = [past_travel_data]
+    next_location = self.city_with_most_activities()
+    arrival_date = datetime.now() + timedelta(days=1)
+    itinerary.append({'from': current_location['name'], 'to': next_location['name'], 'departure_date': datetime.now(),
+                      'arrival_date': arrival_date})
+    return itinerary
+
+
+def generate_itinerary_1(self, current_location, past_travel_data):
+    itinerary = [past_travel_data]
+    next_location = self.city_farthest_away()
+    arrival_date = datetime.now() + timedelta(days=1)
+    itinerary.append({'from': current_location['name'], 'to': next_location['name'],
+                      'departure_date': datetime.now(), 'arrival_date': arrival_date})
+    return itinerary
 
 
 class ReviewItineraryScreen(Screen):
-    pass
+    itinerary_1 = generate_itinerary_1(current_location, past_travel_data)
+    itinerary_2 = generate_itinerary_2(current_location, past_travel_data)
 
 
 class TravelPlannerApp(App):
