@@ -20,9 +20,10 @@ from sqlalchemy.exc import SQLAlchemyError
 import requests
 
 # Local application imports
-from package_deal_db import PackageDealDb, Venue, Operator, Forecast, OperatorVenueRelation
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from installer.database import FinalDatabase, Forecast, Operator, Venue
 
-#~ this shows a popup when the button in new venue screen is clicked, potentially useful for error messages
+
 def show_popup(self, happened, message):
     content = BoxLayout(orientation='vertical')
     label = Label(text=message, font_size=20, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
@@ -47,12 +48,12 @@ class NewVenueScreen(Screen):
         if venue_name == '' or venue_lat == '' or venue_lon == '' or venue_type == '':
             show_popup(self, 'Failed', 'Failed to create new venue!\nCause: All fields must be filled.')
         else:
-            existing_venue = session.query(Venue).filter_by(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type).first()
+            existing_venue = session.query(Venue).filter_by(name=venue_name, latitude=venue_lat, longitude=venue_lon, type=venue_type).first()
             if existing_venue:
                 show_popup(self, 'Failed', 'Failed to create new venue!\nCause: Venue with the same name, location, and type already exists.')
             else:
                 try:
-                    new_venue = Venue(name=venue_name, venue_lat=venue_lat, venue_lon=venue_lon, type=venue_type)
+                    new_venue = Venue(name=venue_name, latitude=venue_lat, longitude=venue_lon, type=venue_type)
                     session.add(new_venue)
                     session.commit()
                 except SQLAlchemyError as exception:
@@ -62,13 +63,13 @@ class NewVenueScreen(Screen):
                     self.ids.venue_name.text = ''
                     self.ids.venue_lat.text = ''
                     self.ids.venue_lon.text = ''
-                    self.ids.venue_type.text = ''
+                    self.ids.venue_type.text = 'Type Of Venue'
                     
     def clearNewVenueFields(self):
         self.ids.venue_name.text = ''
         self.ids.venue_lat.text = ''
         self.ids.venue_lon.text = ''
-        self.ids.venue_type.text = ''
+        self.ids.venue_type.text = 'Type Of Venue'
 
 class AddEditOperatorScreen(Screen):
     pass
@@ -121,7 +122,7 @@ class EditOperatorScreen(Screen):
                     show_popup(self, 'Failed', f'Failed to edit operator!\nCause: {exception}')
                 else:
                     show_popup(self, 'Success', 'Operator edited!')
-                    self.ids.existing_operator_name.text = ''
+                    self.ids.existing_operator_name.text = "Existing Operator's Name"
                     self.ids.new_operator_name.text = ''
                     self.ids.new_operator_rating.text = ''
                     self.ids.existing_operator_name.values = self.getOperatorNames()
@@ -138,7 +139,7 @@ class EditOperatorScreen(Screen):
         self.ids.existing_operator_name.values = self.getOperatorNames()
 
     def clearEditOperatorFields(self):
-        self.ids.existing_operator_name.text = ''
+        self.ids.existing_operator_name.text = "Existing Operator's Name"
         self.ids.new_operator_name.text = ''
         self.ids.new_operator_rating.text = ''
 
@@ -148,7 +149,7 @@ class CheckForecastScreen(Screen):
         venue_names = []
         venues = session.query(Venue).all()
         for venue in venues:
-            venue_info = f"Name: {venue.name} | Location: {venue.venue_lat}, {venue.venue_lon} | Type: {venue.type}"
+            venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
             venue_names.append(venue_info)
         return venue_names
     
@@ -164,7 +165,8 @@ class CheckForecastScreen(Screen):
         return date_formatted_7_days
 
 
-    #Forecast       
+    #Forecast    
+    '''   
     def get_forecast(self):
         
        # api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
@@ -271,10 +273,115 @@ class CheckForecastScreen(Screen):
         else:
             show_popup(self, 'Success', 'Forecast saved to database!')
             
+    '''
 
 class SubmitReviewScreen(Screen):
-    pass
+    
+    def getOperatorNames(self):
+        operator_names = []
+        operators = session.query(Operator).all()
+        for operator in operators:
+            operator_names.append(operator.name)
+        return operator_names
+    
+    def getVenueNames(self):
+        venue_names = []
+        venues = session.query(Venue).all()
+        for venue in venues:
+            venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
+            venue_names.append(venue_info)
+        return venue_names
+    
+    def updateSpinner(self):
+        self.ids.existing_operator_name.values = self.getOperatorNames()
+        self.ids.existing_venue_name.values = self.getVenueNames()
+        
+    def clearReviewFields(self):
+        self.ids.existing_operator_name.text = "Existing Operator's Name"
+        self.ids.existing_venue_name.text = "Existing Venue's Name"
+        self.ids.venue_review.text = ''
+        self.ids.operator_review.text = ''
 
+    def addOperatorReview(self):
+        try:
+            operator_name = self.ids.existing_operator_name.text
+            operator_review = self.ids.operator_review.text
+            
+            if operator_name == '' or operator_review == '':
+                show_popup(self, 'Failed', 'Failed to add operator review!\nCause: All fields must be filled.')
+            else:
+                try:
+                    existing_operator = session.query(Operator).filter_by(name=operator_name).first()
+                    
+                    if existing_operator.reviews is not None:
+                        review_list = existing_operator.reviews.split(',')
+                        review_list.append(operator_review)
+                        existing_operator.reviews = ','.join(review_list)
+                        
+                        average_rating = 0
+                        for review in review_list:
+                            average_rating += int(review[0])
+                            print (average_rating)
+                            
+                        existing_operator.average_rating = average_rating / len(review_list)
+                    else:
+                        existing_operator.reviews = operator_review
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to add operator review!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'Operator review added!')
+                    self.ids.existing_operator_name.text = "Existing Operator's Name"
+                    self.ids.operator_review.text = ''
+        except Exception as e:
+            show_popup(self, 'Failed', f'Failed to add operator review!\nCause: {e}')
+            self.ids.existing_operator_name.text = "Existing Operator's Name"
+            self.ids.operator_review.text = ''
+                
+    def addVenueReview(self):
+        try:
+            venue_name = self.ids.existing_venue_name.text
+            venue_review = self.ids.venue_review.text
+
+            if venue_name == '' or venue_review == '':
+                show_popup(self, 'Failed', 'Failed to add venue review!\nCause: All fields must be filled.')
+            else:
+                try:
+                    venues = session.query(Venue).all()
+                    current_venue = None
+                    for venue in venues:
+                        venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
+                        if venue_info == venue_name:
+                            current_venue = venue
+                            break
+                        
+                    existing_venue = session.query(Venue).filter_by(name=current_venue.name).first()
+                    
+                    if existing_venue.reviews is not None:
+                        review_list = existing_venue.reviews.split(',')
+                        review_list.append(venue_review)
+                        existing_venue.reviews = ','.join(review_list)
+                        
+                        average_rating = 0
+                        for review in review_list:
+                            average_rating += int(review[0])
+                            print (average_rating)
+                            
+                        existing_venue.average_rating = average_rating / len(review_list)
+                    else:
+                        existing_venue.reviews = venue_review
+                    session.commit()
+                except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to add venue review!\nCause: {exception}')
+                else:
+                    show_popup(self, 'Success', 'Venue review added!')
+                    self.ids.existing_venue_name.text = "Existing Venue's Name"
+                    self.ids.venue_review.text = ''
+        except Exception as e:
+            show_popup(self, 'Failed', f'Failed to add venue review!\nCause: {e}')
+            self.ids.existing_venue_name.text = "Existing Venue's Name"
+            self.ids.venue_review.text = ''
+            
 
 
 
@@ -285,21 +392,22 @@ class PackageDealApp(App):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
 
 if __name__ == '__main__':
-    file_path = 'first_tracking_app/credentials.json'
-    with open(file_path, 'r') as file:
-        credential_information = json.load(file)
+    try:
+        parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        file_path = os.path.join(parent_directory, "installer", "credentials.json")
+        with open(file_path, 'r') as file:
+            credential_information = json.load(file)
+        authority = credential_information['AUTHORITY']
+        port = credential_information['PORT']
+        database_name = credential_information['DATABASE_NAME']
+        username = credential_information['USERNAME']
+        password = credential_information['PASSWORD']
+    except FileNotFoundError:
+        print('Could not find credentials.json file!', file=stderr)
+        exit(1)
     
-    
-    authority = credential_information['AUTHORITY']
-    port = credential_information['PORT']
-    database_name = credential_information['DATABASE_NAME']
-    username = credential_information['USERNAME']
-    password = credential_information['PASSWORD']
-    
-    url = PackageDealDb.construct_mysql_url(authority, port, database_name, username, password)
-    package_deal_db = PackageDealDb(url)
+    url = FinalDatabase.construct_mysql_url(authority, port, database_name, username, password)
+    package_deal_db = FinalDatabase(url)
     session = package_deal_db.create_session()
     app = PackageDealApp()
     app.run()
-    
-    
