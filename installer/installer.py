@@ -29,22 +29,22 @@ def add_starter_data(session):
                          type='Indoor Sports Arena', operators=[operator2])
     session.add(sports_arena)
 
-    forecast1 = Forecast(date=datetime(2021, 1, 1), forecastData='Sunny', venueID=1)
+    forecast1 = Forecast(date=datetime(2021, 1, 1), forecastData='overcast clouds', venueID=1)
     session.add(forecast1)
 
-    forecast2 = Forecast(date=datetime(2021, 1, 2), forecastData='Rainy', venueID=1)
+    forecast2 = Forecast(date=datetime(2021, 1, 2), forecastData='light rain', venueID=1)
     session.add(forecast2)
 
-    forecast3 = Forecast(date=datetime(2021, 1, 3), forecastData='Sunny', venueID=2)
+    forecast3 = Forecast(date=datetime(2021, 1, 3), forecastData='overcast clouds', venueID=2)
     session.add(forecast3)
 
-    forecast4 = Forecast(date=datetime(2021, 1, 4), forecastData='Sunny', venueID=2)
+    forecast4 = Forecast(date=datetime(2021, 1, 4), forecastData='light rain', venueID=2)
     session.add(forecast4)
 
-    forecast5 = Forecast(date=datetime(2021, 1, 5), forecastData='Cloudy', venueID=3)
+    forecast5 = Forecast(date=datetime(2021, 1, 5), forecastData='overcast clouds', venueID=3)
     session.add(forecast5)
 
-    forecast6 = Forecast(date=datetime(2021, 1, 6), forecastData='Cloudy', venueID=3)
+    forecast6 = Forecast(date=datetime(2021, 1, 6), forecastData='light rain', venueID=3)
     session.add(forecast6)
     
     #Airport App
