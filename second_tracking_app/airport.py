@@ -33,7 +33,7 @@ class Forecast(Persisted):
     airport_id = Column(Integer, ForeignKey('airports.airport_id'))
     forecast_data = Column(String(1024))
     date = Column(DateTime, default=datetime.datetime.utcnow)
-    airport = relationship('Airport', back_populates='forecasts')
+    airport = relationship('Airport', back_populates='forecasts')t
 
 class AirportDatabase:
     def __init__(self, url):
