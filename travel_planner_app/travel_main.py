@@ -175,7 +175,8 @@ class PrepareItineraryScreen(Screen):
     current_location = StringProperty('Lincoln, Nebraska')
     days_into_journey = NumericProperty(0)
 
-    def update_info(self, location, day):        self.current_location = location
+    def update_info(self, location, day):
+        self.current_location = location
 
         self.days_into_journey = day
 
