@@ -17,7 +17,7 @@ def add_starter_data(session):
     session.add(operator1)
     session.add(review1)
 
-    operator2 = Operator(name='Test Stephan Hawkson', average_rating=5)
+    operator2 = Operator(name='Test Stephan Hawkson', average_rating=5, num_reviews='3,4,5,6,7')
     review2 = Reviews(review='He is a really bad operator')
     operator2.reviews = [review2]
     session.add(operator2)
@@ -74,7 +74,7 @@ def add_starter_data(session):
 def main():
     try:
         parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        file_path = os.path.join(parent_directory, "installer", "../credentials.json")
+        file_path = os.path.join(parent_directory, "installer", "credentials.json")
         with open(file_path, 'r') as file:
             credential_information = json.load(file)
         authority = credential_information['AUTHORITY']

@@ -28,7 +28,8 @@ class Operator(Persisted):
     operatorID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
     average_rating = Column(Float)
-    reviews = Column(String(256))
+    num_reviews = Column(Text)
+    reviews = relationship('Reviews', uselist=True, secondary='operator_reviews', back_populates='operators')
 
     venues = relationship('Venue', back_populates='operators')
 

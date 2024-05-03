@@ -193,6 +193,11 @@ def calculate_distance(location1, location2):
                   math.cos(math.radians(lon2 - lon1))) * R
     return d
 
+def city_with_most_activities_main(self):
+    pass
+
+def city_farthest_away_main(self):
+    pass
 
 class PrepareItineraryScreen(Screen):
     current_location = StringProperty('Lincoln, Nebraska')
@@ -204,10 +209,10 @@ class PrepareItineraryScreen(Screen):
         self.days_into_journey = day
 
     def city_with_most_activities(self):
-        pass
+        city_with_most_activities_main(self)
 
     def city_farthest_away(self):
-        pass
+        city_farthest_away_main(self)
 
     def city_in_range(self, cities, current_location):
         cites = []
@@ -221,7 +226,7 @@ class PrepareItineraryScreen(Screen):
 
 def generate_itinerary_2(self, current_location, past_travel_data):
     itinerary = [past_travel_data]
-    next_location = self.city_with_most_activities()
+    next_location = city_with_most_activities_main(self)
     arrival_date = datetime.now() + timedelta(days=1)
     itinerary.append({'from': current_location['name'], 'to': next_location['name'], 'departure_date': datetime.now(),
                       'arrival_date': arrival_date})
@@ -230,7 +235,7 @@ def generate_itinerary_2(self, current_location, past_travel_data):
 
 def generate_itinerary_1(self, current_location, past_travel_data):
     itinerary = [past_travel_data]
-    next_location = self.city_farthest_away()
+    next_location = city_farthest_away_main(self)
     arrival_date = datetime.now() + timedelta(days=1)
     itinerary.append({'from': current_location['name'], 'to': next_location['name'],
                       'departure_date': datetime.now(), 'arrival_date': arrival_date})
@@ -238,8 +243,10 @@ def generate_itinerary_1(self, current_location, past_travel_data):
 
 
 class ReviewItineraryScreen(Screen):
-    itinerary_1 = generate_itinerary_1(current_location, past_travel_data)
-    itinerary_2 = generate_itinerary_2(current_location, past_travel_data)
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        itinerary_1 = generate_itinerary_1(self,current_location, past_travel_data)
+        itinerary_2 = generate_itinerary_2(self,current_location, past_travel_data)
 
 
 class TravelPlannerApp(App):
