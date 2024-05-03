@@ -36,6 +36,7 @@ This project requires the following python libraries:
 - Python 3.10 (or later)
 - Kivy
 - SQLAlchemy
+- Requests (for API calls)
 
 You can install these dependencies using pip:
 
@@ -47,3 +48,32 @@ You can install these dependencies using pip:
 
 No build step is required as this is a Python project.
 
+### Database Creation
+The installer script `installer.py` will automatically create 
+the necessary database tables when it is ran. It uses the 
+settings defined in `credentials.py` to connect to the 
+database. You will need to create a database beforehand 
+and put those credentials into `credentials.py`
+
+1. Setup Python Environment
+2. Ensure Python 3.10 or newer is installed.
+3. Install the necessary Python packages:
+
+`pip install sqlalchemy kivy mysql-connector-python requests
+`
+
+
+To initialize the database schema and populate it with starter data:
+
+`python installer.py`
+
+To start the tracking application:
+
+`python airport_main.py`
+
+
+### Running
+To run the travel planner app, import the project into your IDE of choice and 
+create a new `.py` file titled `credentials.py` and by using the information
+matching with the instructions in the example file, `credentials_example.py`. Then run `installer.py`
+which will set up the tables in your database. After that point, run `travel_main.py` and use the Travel Planner App. 
