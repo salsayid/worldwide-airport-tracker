@@ -96,6 +96,11 @@ def add_starter_data(session):
     forecast6 = Forecast(date=datetime(2021, 1, 6), forecastData='Cloudy', venueID=3)
     session.add(forecast6)
 
+    city1 = City(name="Lincoln", encompassing_entity="Nebraska", location="41.4925, 99.9018")
+    session.add(city1)
+
+    city2 = City(name="Omaha", encompassing_entity="Nebraska", location="41.2565, -95.9345")
+    session.add(city2)
 
 def main():
     try:

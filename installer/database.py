@@ -14,7 +14,7 @@ class Venue(Persisted):
     longitude = Column(String(256), nullable=False)
     type = Column(String(50), nullable=False)
     average_rating = Column(Float)
-    reviews = Column(Text)
+    reviews = Column(String(256))
 
     operatorID = Column(Integer, ForeignKey('operators.operatorID'))
 
@@ -28,7 +28,7 @@ class Operator(Persisted):
     operatorID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
     average_rating = Column(Float)
-    reviews = Column(Text)
+    reviews = Column(String(256))
 
     venues = relationship('Venue', back_populates='operators')
 
@@ -77,15 +77,16 @@ class City(Persisted):
     encompassing_entity = Column(String(256))
     location = Column(String(256))
 
-    airports = relationship('Airport', secondary='airport_city_relation', back_populates='cities', cascade='all, delete')
+    airports = relationship('Airport', secondary='airport_city_relation', back_populates='cities',
+                            cascade='all, delete')
 
 
 class AirportCityRelation(Persisted):
     __tablename__ = 'airport_city_relation'
     city_airportID = Column(Integer, primary_key=True, autoincrement=True)
 
-    cityID = Column(Integer, ForeignKey('cities.cityID'), primary_key=True)
-    airportID = Column(Integer, ForeignKey('airports.airportID'), primary_key=True)
+    cityID = Column(Integer, ForeignKey('cities.cityID'))
+    airportID = Column(Integer, ForeignKey('airports.airportID'))
 
 
 class FinalDatabase(object):
@@ -116,7 +117,7 @@ class FinalDatabase(object):
             City.__table__.drop(self.engine)
             Airport.__table__.drop(self.engine)
 
-            #Persisted.metadata.drop_all(self.engine)
+            # Persisted.metadata.drop_all(self.engine)
         except Exception as e:
             pass
 

@@ -57,7 +57,7 @@ def add_starter_data(session):
 def main():
     try:
         parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        file_path = os.path.join(parent_directory, "installer", "credentials.json")
+        file_path = os.path.join(parent_directory, "installer", "../credentials.json")
         with open(file_path, 'r') as file:
             credential_information = json.load(file)
         authority = credential_information['AUTHORITY']
@@ -76,9 +76,11 @@ def main():
         final_database.drop_all_tables()
         final_database.ensure_tables_exist()
         print('Tables created.')
+
         session = final_database.create_session()
         add_starter_data(session)
         session.commit()
+
         print('Records created.')
     except SQLAlchemyError as e:
         print('Database setup failed!', file=stderr)
