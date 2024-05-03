@@ -125,9 +125,7 @@ ScreenManager:
                 Button:
                     text: 'Submit'
                     font_size: '18sp'
-                    on_press:
-                        root.submit_credentials()
-                        app.root.current = 'LoadingScreen'
+                    on_press: root.submit_credentials()
 
 <LoadingScreen>:
     name: 'LoadingScreen'
@@ -300,10 +298,11 @@ ScreenManager:
                 orientation: 'vertical'
                 padding: (20,40,20,40)
                 size_hint: (1, None)
-                size: (0, 700)
+                size: (0, 625)
                 DataLabel:
-                    text: 'Average Rating: 0\n\nNew Review:\n\ntext'
-                    font_size: '18sp'
+                    id: ratings
+                    text: 'Average Rating: 0\n\nNew Score: 0'
+                    font_size: '25sp'
                     background_color: (1,1,1,1)
                     color: (0,0,0,1)
             BoxLayout:
@@ -324,6 +323,16 @@ ScreenManager:
                     size: (0, 75)
                     background_color: (0,0.5,0.9,1)
                     values: ('Operator 1', 'Operator 2')
+                    on_text: root.update_operator_text()
+                Spinner:
+                    id: venue_spinner
+                    text: 'Select Venue'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 75)
+                    background_color: (0,0.5,0.9,1)
+                    values: ('Venue 1', 'Venue 2')
+                    on_text: root.update_venue_text()
                 Button:
                     text: 'Confirm Review'
                     font_size: '16sp'
