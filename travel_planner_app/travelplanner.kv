@@ -219,11 +219,13 @@ ScreenManager:
                 padding: (20,40,20,40)
                 spacing: 20
                 TextInput:
-                    text: 'ICAO Code (Empty if selecting a city)'
+                    id: icao_code
+                    text: 'ICAO Code (Leave as is if selecting a city)'
                     font_size: '16sp'
                     size_hint: (1, None)
                     size: (0, 57.5)
                 TextInput:
+                    id: ac_name
                     text: 'Name'
                     font_size: '16sp'
                     size_hint: (1, None)
@@ -234,11 +236,13 @@ ScreenManager:
                     size_hint: (1, None)
                     size: (0, 57.5)
                 TextInput:
+                    id: lat
                     text: 'Latitude'
                     font_size: '16sp'
                     size_hint: (1, None)
                     size: (0, 57.5)
                 TextInput:
+                    id: lon
                     text: 'Longitude'
                     font_size: '16sp'
                     size_hint: (1, None)
@@ -257,6 +261,7 @@ ScreenManager:
                     size: (0, 57.5)
                     background_color: (0,0.5,0.9,1)
                     values: ('Airport 1', 'Airport 2')
+                    on_text: root.update_airport_text()
                 Spinner:
                     id: city_spinner
                     text: 'Select City'
@@ -265,6 +270,7 @@ ScreenManager:
                     size: (0, 57.5)
                     background_color: (0,0.5,0.9,1)
                     values: ('City 1', 'City 2')
+                    on_text: root.update_city_text()
                 Button:
                     text: 'Validate'
                     font_size: '16sp'

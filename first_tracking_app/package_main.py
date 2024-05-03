@@ -158,114 +158,87 @@ class CheckForecastScreen(Screen):
 
     def generateNext7Days(self):
         today = date.today()
-        next_7_days = [today + timedelta(days=i) for i in range(0, 7)]
-        date_formatted_7_days = []
-        for day in next_7_days:
-            date_formatted_7_days.append(day.strftime("%Y/%m/%d"))
-        return date_formatted_7_days
+        print(today)
+        next_5_days = [today + timedelta(days=i) for i in range(0, 5)]
+        date_formatted_5_days = []
+        for day in next_5_days:
+            for hour in range(0, 24, 3):  # Change the step size to 3
+                time_code = f"{hour:02d}:00:00"
+                date_formatted_5_days.append(f"{day.strftime('%Y-%m-%d')} {time_code}")
+        return date_formatted_5_days
 
 
-    #Forecast    
-    '''   
-    def get_forecast(self):
-        
-       # api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
-        
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={icao_code}&appid={api_key}"
+    #Forecast       
+    def get_forecast(self, lat, lon):
+        try:
+            parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            file_path = os.path.join(parent_directory, "installer", "credentials.json")
+            with open(file_path, 'r') as file:
+                credential_information = json.load(file)
+            api_key = credential_information['API_KEY']
+        except FileNotFoundError:
+            print('Could not find credentials.json file!', file=stderr)
+            exit(1)
+
+
+        url = f"http://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}"
         try:
             response = requests.get(url)
             data = response.json()
+            
             if response.status_code == 200:
-                forecast = data["weather"][0]["description"]
-                print(f"Forecast for {icao_code} on {date_str}: {forecast}")
+                weather = None
+            
+                for item in data['list']:
+                    #print (item['dt_txt'])
+                    if item['dt_txt'] == self.ids.date_for_forecast.text:
+                        weather = item['weather'][0]['description']
+                        break
+        
+                return weather
+                
             else:
-                print(f"Failed to fetch forecast. Status code: {response.status_code}")
+                show_popup(self, 'Failed', f'Failed to fetch forecast. Status code: {response.status_code}')
+            
         except Exception as e:
-            print("An error occurred:", e)
+            show_popup(self, 'Failed', f'An error occurred: {e}')
     
-    
-    
-    def settupGetWeather(self):
+    def getWeather(self):
         try:
-            existing_venue_name = self.ids.existing_venue_name.text
-            location = existing_venue_name.split('\nLocation: ')[1].split(', ')
-            venue_lat = location[0]
-            venue_lon = location[1].split('\nType: ')[0]
-            self.getWeather(venue_lat, venue_lon)
+            try:
+                venue_name = self.ids.existing_venue_name.text
+                venues = session.query(Venue).all()
+                current_venue = None
+                for venue in venues:
+                    venue_info = f"Name: {venue.name} | Location: {venue.latitude}, {venue.longitude} | Type: {venue.type}"
+                    if venue_info == venue_name:
+                        current_venue = venue
+                        break
+                    
+                existing_venue = session.query(Venue).filter_by(name=current_venue.name).first()
+            except SQLAlchemyError as exception:
+                    show_popup(self, 'Failed', f'Failed to add venue review!\nCause: {exception}')
+                
+            lat = existing_venue.latitude
+            long = existing_venue.longitude
+
+            weather_result = self.get_forecast(lat, long)
+            
+            if weather_result is None:
+                show_popup(self, 'No Information', 'The selected time does not have any weather information.')
+            else:
+                show_popup(self, 'Weather Result', f'The weather for the selected time is: {weather_result}')
+                self.save_to_database(current_venue, weather_result)
+                
+        
         except Exception as e:
             show_popup(self, 'Failed', f'Failed to get venue location!\nCause: {e}')
     
-    
-    def getWeather(self, lat, lon):
-        connection = RESTConnection('api.openweathermap.org', 443, '/data/2.5')
-        connection.send_request(
-            'forecast',
-            {
-                'appid': cred.API_KEY,
-                'lat': lat,
-                'lon': lon,
-                'units': 'imperial'
-            },
-            None,
-            self.store_forecast_data,
-            self.connectionFailed,
-            None
-        )
-
-    def connectionFailed(self, _, response):
-        show_popup(self, 'Failed', 'Failed to connect to weather API!')
 
 
-    def store_forecast_data(self, _, response):
-        #print (response)
-        if response:
-            try:
-                existing_venue_name = self.ids.existing_venue_name.text
-                location = existing_venue_name.split('\nLocation: ')[1].split(', ')
-                venue_lat = location[0]
-                venue_lon = location[1].split('\nType: ')[0]
-                
-                test_response = (response)
-                
-                print (test_response)
-                
-                #chosen_date = self.ids.date_for_forecast.text
- 
-                #print (self.parseWeather(response))
- 
- 
-                self.ids.forecast_label.text = ('Forecast added to database')
-                
-                
-            except Exception as e:
-                print(e)
-                    
-            
-            
-    def parseWeather(self, forecast_data):
-        # Assuming `data` is your JSON string
-        data = json.loads(data)
-
-        # Convert the date string to a datetime object for comparison
-        target_date = datetime.strptime('2024-04-17 03:00:00', '%Y-%m-%d %H:%M:%S')
-
-        for item in data['list']:
-            # Convert the timestamp to a datetime object
-            item_date = datetime.fromtimestamp(item['dt'])
-
-            if item_date == target_date:
-                print(f"Temperature: {item['main']['temp']}°F")
-                print(f"Humidity: {item['main']['humidity']}%")
-                print(f"Wind Speed: {item['wind']['speed']} mph")
-                print(f"Weather Description: {item['weather'][0]['description']}")
-                break
-
-
-        
-    def save_to_database(self):
+    def save_to_database(self, current_venue, weather_result):
         try:
-            new_forecast = Forecast(date=self.date, temperature=self.temperature, humidity=self.humidity,
-                                    wind_speed=self.wind_speed, weather_description=self.weather_description)
+            new_forecast = Forecast(date=self.ids.date_for_forecast.text, forecastData=weather_result, venueID=current_venue.venueID)
             session.add(new_forecast)
             session.commit()
         except SQLAlchemyError as exception:
@@ -273,7 +246,8 @@ class CheckForecastScreen(Screen):
         else:
             show_popup(self, 'Success', 'Forecast saved to database!')
             
-    '''
+            
+            
 
 class SubmitReviewScreen(Screen):
     
@@ -337,6 +311,7 @@ class SubmitReviewScreen(Screen):
             show_popup(self, 'Failed', f'Failed to add operator review!\nCause: {e}')
             self.ids.existing_operator_name.text = "Existing Operator's Name"
             self.ids.operator_review.text = ''
+                
                 
     def addVenueReview(self):
         try:
