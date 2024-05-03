@@ -1,79 +1,103 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, Table, DateTime, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Text, Float
+from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 import datetime
 
 Persisted = declarative_base()
 
-city_airport_association = Table(
-    'city_airport', Persisted.metadata,
-    Column('city_id', Integer, ForeignKey('cities.city_id')),
-    Column('airport_id', Integer, ForeignKey('airports.airport_id'))
-)
 
 class Venue(Persisted):
-    __tablename__ = 'venue'
-    
+    __tablename__ = 'venues'
+
     venueID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
-    venue_lat = Column(String(256), nullable=False)
-    venue_lon = Column(String(256), nullable=False)
-    type = Column(String(256), nullable=False)
-    
-    operators = relationship('Operator', secondary='operator_venue_relation', back_populates='venues')
+    latitude = Column(String(256), nullable=False)
+    longitude = Column(String(256), nullable=False)
+    type = Column(String(50), nullable=False)
+    average_rating = Column(Float)
+    reviews = Column(String(256))
+
+    operatorID = Column(Integer, ForeignKey('operators.operatorID'))
+
+    operators = relationship('Operator', back_populates='venues', uselist=True)
+    forecasts = relationship('Forecast', back_populates='venue')
 
 
 class Operator(Persisted):
-    __tablename__ = 'operator'
+    __tablename__ = 'operators'
 
     operatorID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
-    average_rating = Column(Integer, nullable=False)
-    
-    venues = relationship('Venue', secondary='operator_venue_relation', back_populates='operators')
+    average_rating = Column(Float)
+    reviews = Column(String(256))
+
+    venues = relationship('Venue', back_populates='operators')
+
+class Reviews(Persisted):
+    __tablename__ = 'reviews'
+    reviewID = Column(Integer, primary_key=True, autoincrement=True)
+    review = Column(String(256), nullable=False)
+    operators = relationship('Operator', uselist=True, secondary='operator_reviews', back_populates='reviews')
+
+class OperatorReviews(Persisted):
+    __tablename__ = 'operator_reviews'
+
+    reviewID = Column(Integer, ForeignKey('reviews.reviewID'), primary_key=True)
+    operatorID = Column(Integer, ForeignKey('operators.operatorID'), primary_key=True)
+
+class OperatorVenueRelationship(Persisted):
+    __tablename__ = 'operator_venues'
+
+    operator_venueID = Column(Integer, primary_key=True, autoincrement=True)
+
+    operatorID = Column(Integer, ForeignKey('operators.operatorID'))
+    venueID = Column(Integer, ForeignKey('venues.venueID'))
+
+    operator = relationship('Operator', backref='operator_venues')
+    venue = relationship('Venue', backref='operator_venues')
 
 
 class Forecast(Persisted):
     __tablename__ = 'forecast'
 
     forecastID = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date, nullable=False)
+    date = Column(DateTime, default=datetime.datetime.utcnow)
     forecastData = Column(String(256), nullable=False)
-    venueID = Column(Integer, ForeignKey('venue.venueID'))
-    
-    venue = relationship('Venue', backref='forecasts')
 
+    venueID = Column(Integer, ForeignKey('venues.venueID'))
+    airportID = Column(Integer, ForeignKey('airports.airportID'))
 
-class OperatorVenueRelation(Persisted):
-    __tablename__ = 'operator_venue_relation'
-    operatorID = Column(Integer, ForeignKey('operator.operatorID'), primary_key=True)
-    venueID = Column(Integer, ForeignKey('venue.venueID'), primary_key=True)
+    venue = relationship('Venue', back_populates='forecasts')
+    airport = relationship('Airport', back_populates='forecasts')
+
 
 class Airport(Persisted):
     __tablename__ = 'airports'
-    airport_id = Column(Integer, primary_key=True)
+    airportID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
     icao_code = Column(String(4), unique=True)
     location = Column(String(256))
-    forecasts = relationship('Forecast', back_populates='airport')
-    cities = relationship('City', secondary=city_airport_association, back_populates='airports')
+
+    forecasts = relationship('Forecast', back_populates='airport', cascade='all, delete')
+    cities = relationship('City', secondary='airport_city_relation', back_populates='airports')
+
 
 class City(Persisted):
     __tablename__ = 'cities'
-    city_id = Column(Integer, primary_key=True)
+    cityID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False)
     encompassing_entity = Column(String(256))
     location = Column(String(256))
-    airports = relationship('Airport', secondary=city_airport_association, back_populates='cities')
 
-class Forecast(Persisted):
-    __tablename__ = 'forecasts'
-    forecast_id = Column(Integer, primary_key=True)
-    airport_id = Column(Integer, ForeignKey('airports.airport_id'))
-    forecast_data = Column(String(1024))
-    date = Column(DateTime, default=datetime.datetime.utcnow)
-    airport = relationship('Airport', back_populates='forecasts')
+    airports = relationship('Airport', secondary='airport_city_relation', back_populates='cities',
+                            cascade='all, delete')
 
+
+class AirportCityRelation(Persisted):
+    __tablename__ = 'airport_city_relation'
+    city_airportID = Column(Integer, primary_key=True, autoincrement=True)
+
+    cityID = Column(Integer, ForeignKey('cities.cityID'))
+    airportID = Column(Integer, ForeignKey('airports.airportID'))
 
 
 class FinalDatabase(object):
@@ -89,16 +113,28 @@ class FinalDatabase(object):
         self.engine = create_engine(url)
         self.Session = sessionmaker()
         self.Session.configure(bind=self.engine)
+        self.session = self.create_session()
 
     def ensure_tables_exist(self):
         Persisted.metadata.create_all(self.engine)
 
     def drop_all_tables(self):
-        Persisted.metadata.drop_all(self.engine)
+        try:
+            AirportCityRelation.__table__.drop(self.engine)
+            OperatorVenueRelationship.__table__.drop(self.engine)
+            Forecast.__table__.drop(self.engine)
+            Venue.__table__.drop(self.engine)
+            Operator.__table__.drop(self.engine)
+            City.__table__.drop(self.engine)
+            Airport.__table__.drop(self.engine)
+
+            # Persisted.metadata.drop_all(self.engine)
+        except Exception as e:
+            pass
 
     def create_session(self):
         return self.Session()
-    
+
     def create_airport(self, name, icao_code, location):
         airport = Airport(name=name, icao_code=icao_code, location=location)
         self.session.add(airport)

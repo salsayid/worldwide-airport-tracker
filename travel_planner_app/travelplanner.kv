@@ -1,3 +1,22 @@
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<DataLabel@Label>:
+    background_color: 0, 0, 0, 0
+    color: 0, 0, 0, 0
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
 ScreenManager:
     StartUpScreen:
     LoadingScreen:
@@ -5,6 +24,7 @@ ScreenManager:
     ValidateLocationsScreen:
     UpdateRatingsScreen:
     PrepareItineraryScreen:
+    ReviewItineraryScreen:
 
 <StartUpScreen>:
     name: 'startup'
@@ -19,50 +39,95 @@ ScreenManager:
                 Label:
                     text: 'Authority:'
                 TextInput:
-                    font_size: '25sp'
+                    id: authority
+                    text: 'localhost'
+                    font_size: '18sp'
                     multiline: False
-                    padding: (10,67.5,0,0)
+                    padding: (10,35,0,0)
             BoxLayout:
                 orientation: 'horizontal'
                 Label:
                     text: 'Port Number:'
                 TextInput:
-                    font_size: '25sp'
+                    id: port_number
+                    text: '3306'
+                    font_size: '18sp'
                     multiline: False
-                    padding: (10,67.5,0,0)
+                    padding: (10,35,0,0)
                     input_filter: 'int'
             BoxLayout:
                 orientation: 'horizontal'
                 Label:
                     text: 'Database Name:'
                 TextInput:
-                    font_size: '25sp'
+                    id: database_name
+                    text: 'database name'
+                    font_size: '18sp'
                     multiline: False
-                    padding: (10,67.5,0,0)
+                    padding: (10,35,0,0)
             BoxLayout:
                 orientation: 'horizontal'
                 Label:
                     text: 'Username:'
                 TextInput:
-                    font_size: '25sp'
+                    id: database_username
+                    text: 'username'
+                    font_size: '18sp'
                     multiline: False
-                    padding: (10,67.5,0,0)
+                    padding: (10,35,0,0)
             BoxLayout:
                 orientation: 'horizontal'
                 Label:
                     text: 'Password:'
                 TextInput:
-                    font_size: '25sp'
+                    id: database_password
+                    font_size: '18sp'
                     multiline: False
-                    padding: (10,67.5,0,0)
+                    padding: (10,35,0,0)
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Please enter the OpenWeather credentials'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Authority:'
+                TextInput:
+                    id: openweather_authority
+                    text: 'api.openweathermap.org'
+                    font_size: '18sp'
+                    multiline: False
+                    padding: (10,35,0,0)
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Port Number:'
+                TextInput:
+                    id: openweather_port_number
+                    text: '443'
+                    font_size: '18sp'
+                    multiline: False
+                    padding: (10,35,0,0)
+                    input_filter: 'int'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'API Key:'
+                TextInput:
+                    id: openweather_key
+                    font_size: '18sp'
+                    multiline: False
+                    padding: (10,35,0,0)
             BoxLayout:
                 orientation: 'horizontal'
                 Label:
                     text: ''
                 Button:
                     text: 'Submit'
-                    font_size: '25sp'
-                    on_press: app.root.current = 'LoadingScreen'
+                    font_size: '18sp'
+                    on_press:
+                        root.submit_credentials()
+                        app.root.current = 'LoadingScreen'
 
 <LoadingScreen>:
     name: 'LoadingScreen'
@@ -71,40 +136,300 @@ ScreenManager:
         BoxLayout:
             orientation: 'horizontal'
             Label:
-                text: 'Travel Planner'
+                text: 'Loading'
+            Button:
+                text: 'Next'
+                font_size: '18sp'
+                on_press: app.root.current = 'MainMenuScreen'
 
 <MainMenuScreen>:
     name: 'MainMenuScreen'
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
-            orientation: 'horizontal'
-            Label:
-                text: 'Travel Planner'
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                DataLabel:
+                    id: needing_validation
+                    text: 'Cities needing validation: 0              Airports needing validation: 0\n\n\nOperators needed updating: 0          Venues needing updating: 0'
+                    font_size: '18sp'
+                    background_color: (1,1,1,1)
+                    color: (0,0,0,1)
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                spacing: 20
+                Button:
+                    text: 'Validate Locations'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 95)
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'ValidateLocationsScreen'
+                Button:
+                    text: 'Update Ratings'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 95)
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'UpdateRatingsScreen'
+                Button:
+                    text: 'Prepare Itinerary'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 95)
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'PrepareItineraryScreen'
+                Button:
+                    text: 'Advance Calender'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 95)
+                    on_press: root.advance_calender()
+                Button:
+                    text: 'Exit Application'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 95)
+                    on_press: root.exit_app()
 
 <ValidateLocationsScreen>:
     name: 'ValidateLocationsScreen'
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
-            orientation: 'horizontal'
-            Label:
-                text: 'Travel Planner'
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                size_hint: (1, None)
+                size: (0, 425)
+                DataLabel:
+                    id: validate_list
+                    text: 'Needing Validation:\n\nCity 1, City 2\nAirport 1, Airport 2'
+                    font_size: '18sp'
+                    background_color: (1,1,1,1)
+                    color: (0,0,0,1)
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                spacing: 20
+                TextInput:
+                    id: icao_code
+                    text: 'ICAO Code (Leave as is if selecting a city)'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                TextInput:
+                    id: ac_name
+                    text: 'Name'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                TextInput:
+                    id: country
+                    text: 'Country (Abbreviated ex. GB and US)'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                TextInput:
+                    id: lat
+                    text: 'Latitude'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                TextInput:
+                    id: lon
+                    text: 'Longitude'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                Button:
+                    text: 'Refresh'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                    on_press: root.refresh()
+                Spinner:
+                    id: airport_spinner
+                    text: 'Select Airport'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                    background_color: (0,0.5,0.9,1)
+                    values: ('Airport 1', 'Airport 2')
+                    on_text: root.update_airport_text()
+                Spinner:
+                    id: city_spinner
+                    text: 'Select City'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                    background_color: (0,0.5,0.9,1)
+                    values: ('City 1', 'City 2')
+                    on_text: root.update_city_text()
+                Button:
+                    text: 'Validate'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                    on_press: root.validate()
+                Button:
+                    text: 'Back to Main'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 57.5)
+                    background_color: (0.5,0,0.9,1)
+                    on_press:
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
 
 <UpdateRatingsScreen>:
     name: 'UpdateRatingsScreen'
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
-            orientation: 'horizontal'
-            Label:
-                text: 'Travel Planner'
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                size_hint: (1, None)
+                size: (0, 700)
+                DataLabel:
+                    text: 'Average Rating: 0\n\nNew Review:\n\ntext'
+                    font_size: '18sp'
+                    background_color: (1,1,1,1)
+                    color: (0,0,0,1)
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                spacing: 20
+                Button:
+                    text: 'Refresh'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 75)
+                    on_press: root.refresh()
+                Spinner:
+                    id: operator_spinner
+                    text: 'Select Operator'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 75)
+                    background_color: (0,0.5,0.9,1)
+                    values: ('Operator 1', 'Operator 2')
+                Button:
+                    text: 'Confirm Review'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 75)
+                    on_press: root.confirm_review()
+                Button:
+                    text: 'Reject Review'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 75)
+                    on_press: root.reject_review()
+                Button:
+                    text: 'Back to Main'
+                    font_size: '16sp'
+                    size_hint: (1, None)
+                    size: (0, 75)
+                    background_color: (0.5,0,0.9,1)
+                    on_press:
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
 
 <PrepareItineraryScreen>:
     name: 'PrepareItineraryScreen'
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
-            orientation: 'horizontal'
-            Label:
-                text: 'Travel Planner'
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                size_hint: (1, None)
+                size: (0, 750)
+                DataLabel:
+                    id: location_day_id
+                    text: 'Current Location:' + root.current_location + '\nNumber of Days:' + str(root.days_into_journey)
+                    font_size: '18sp'
+                    background_color: (1,1,1,1)
+                    color: (0,0,0,1)
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                spacing: 20
+                Button:
+                    text: 'Request Updated Itinerary'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 125)
+                    on_press: root.update_itinerary()
+                Button:
+                    text: 'Select Updated Itinerary'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 125)
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'ReviewItineraryScreen'
+                Button:
+                    text: 'Back to Main'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 125)
+                    background_color: (0.5,0,0.9,1)
+                    on_press:
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
+<ReviewItineraryScreen>:
+    name: 'ReviewItineraryScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: (20,40,20,40)
+            size_hint: (1, None)
+            size: (0, 750)
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Proposed Itineraries:'
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Itinerary 1'
+                    font_size: '16sp'
+                    on_press:
+                        root.select_itinerary(1)
+                Label:
+                    id: itinerary1
+                    text: root.itinerary_1
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Itinerary 2'
+                    font_size: '16sp'
+                    on_press:
+                        root.select_itinerary(2)
+                Label:
+                    id: itinerary1
+                    text: root.itinerary_2
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Back'
+                    font_size: '16sp'
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'PrepareItineraryScreen'
