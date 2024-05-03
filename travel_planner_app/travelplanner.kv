@@ -347,49 +347,50 @@ ScreenManager:
                         app.root.current = 'MainMenuScreen'
 
 <PrepareItineraryScreen>:
-#    name: 'PrepareItineraryScreen'
-#    BoxLayout:
-#        orientation: 'vertical'
-#        BoxLayout:
-#            orientation: 'vertical'
-#            BoxLayout:
-#                orientation: 'vertical'
-#                padding: (20,40,20,40)
-#                size_hint: (1, None)
-#                size: (0, 750)
-#                DataLabel:
-#                    id: location_day_id
-#                    text: 'Current Location:' + root.current_location + '\nNumber of Days:' + str(root.days_into_journey)
-#                    font_size: '18sp'
-#                    background_color: (1,1,1,1)
-#                    color: (0,0,0,1)
-#            BoxLayout:
-#                orientation: 'vertical'
-#                padding: (20,40,20,40)
-#                spacing: 20
-#                Button:
-#                    text: 'Request Updated Itinerary'
-#                    font_size: '18sp'
-#                    size_hint: (1, None)
-#                    size: (0, 125)
-#                    on_press: root.update_itinerary()
-#                Button:
-#                    text: 'Select Updated Itinerary'
-#                    font_size: '18sp'
-#                    size_hint: (1, None)
-#                    size: (0, 125)
-#                    on_press:
-#                        app.root.transition.direction = 'left'
-#                        app.root.current = 'ReviewItineraryScreen'
-#                Button:
-#                    text: 'Back to Main'
-#                    font_size: '18sp'
-#                    size_hint: (1, None)
-#                    size: (0, 125)
-#                    background_color: (0.5,0,0.9,1)
-#                    on_press:
-#                        app.root.transition.direction = 'right'
-#                        app.root.current = 'MainMenuScreen'
+    name: 'PrepareItineraryScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                size_hint: (1, None)
+                size: (0, 750)
+                DataLabel:
+                    id: location_day_id
+                    text: 'Current Location:' + root.current_location + '\nNumber of Days:' + str(root.days_into_journey)
+                    font_size: '18sp'
+                    background_color: (1,1,1,1)
+                    color: (0,0,0,1)
+            BoxLayout:
+                orientation: 'vertical'
+                padding: (20,40,20,40)
+                spacing: 20
+                Button:
+                    text: 'Request Updated Itinerary'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 125)
+                    on_press: root.update_itinerary()
+                Button:
+                    text: 'Select Updated Itinerary'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 125)
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'ReviewItineraryScreen'
+                Button:
+                    text: 'Back to Main'
+                    font_size: '18sp'
+                    size_hint: (1, None)
+                    size: (0, 125)
+                    background_color: (0.5,0,0.9,1)
+                    on_press:
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
+
 <ReviewItineraryScreen>:
 #    name: 'ReviewItineraryScreen'
 #    BoxLayout:
