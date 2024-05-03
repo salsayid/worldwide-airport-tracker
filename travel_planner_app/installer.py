@@ -1,7 +1,5 @@
 from datetime import datetime
 from sys import stderr
-
-import requests
 from sqlalchemy.exc import SQLAlchemyError
 from database import FinalDatabase, Airport, City, Forecast, Operator, Venue, Reviews
 import os
@@ -9,8 +7,7 @@ import json
 
 
 def add_starter_data(session):
-    
-    #Package Deal App
+    # Package Deal App
     operator1 = Operator(name='Test Jeffery Danger', average_rating=5)
     review1 = Reviews(review='He is a really good operator')
     operator1.reviews = [review1]
@@ -52,7 +49,7 @@ def add_starter_data(session):
 
     forecast6 = Forecast(date=datetime(2021, 1, 6), forecastData='light rain', venueID=3)
     session.add(forecast6)
-    
+
     city1 = City(name='London', encompassing_entity='GB', location='51.5073219,-0.1276474')
     city2 = City(name='Omaha', encompassing_entity='US', location='41.2587459,-95.9383758')
 
@@ -67,14 +64,14 @@ def add_starter_data(session):
     session.add(city2)
     session.add(airport1)
     session.add(airport2)
-    
-    #TODO Add airport data here, idk the format of the data so I can't add it
+
+    # TODO Add airport data here, idk the format of the data so I can't add it
 
 
 def main():
     try:
         parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        file_path = os.path.join(parent_directory, "installer", "../credentials.json")
+        file_path = os.path.join(parent_directory, "installer", "credentials.json")
         with open(file_path, 'r') as file:
             credential_information = json.load(file)
         authority = credential_information['AUTHORITY']
@@ -85,7 +82,6 @@ def main():
     except FileNotFoundError:
         print('Could not find credentials.json file!', file=stderr)
         exit(1)
-    
 
     try:
         url = FinalDatabase.construct_mysql_url(authority, port, database_name, username, password)
@@ -93,11 +89,9 @@ def main():
         final_database.drop_all_tables()
         final_database.ensure_tables_exist()
         print('Tables created.')
-
         session = final_database.create_session()
         add_starter_data(session)
         session.commit()
-
         print('Records created.')
     except SQLAlchemyError as e:
         print('Database setup failed!', file=stderr)

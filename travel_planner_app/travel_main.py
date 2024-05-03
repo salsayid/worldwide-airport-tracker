@@ -1,10 +1,13 @@
+import math
 import os
 import csv
+from datetime import datetime, timedelta
 
 import requests
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.modules import inspector
+from kivy.properties import NumericProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -27,13 +30,17 @@ airport_coords = []
 city_country = None
 city_lat = 0
 city_lon = 0
+current_location = ''
+past_travel_data = ''
 
 def show_choose_popup(self, happened, message1, message2):
     content = BoxLayout(orientation='vertical')
-    database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
-    new_info = Label(text=message2, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
+    database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center',
+                          valign='middle')
+    new_info = Label(text=message2, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center',
+                     valign='middle')
     select_database = Button(text='Choose Database Info', size_hint=(1, 0.2))
-    select_new = Button(text='Choose New Info', size_hint=(1, 0.2), on_press=lambda x:self.save_new_info())
+    select_new = Button(text='Choose New Info', size_hint=(1, 0.2), on_press=lambda x: self.save_new_info())
     close_button = Button(text='Close', size_hint=(1, 0.2))
     content.add_widget(database_info)
     content.add_widget(new_info)
@@ -90,11 +97,14 @@ class StartUpScreen(Screen):
         except SQLAlchemyError:
             print("no connection")
 
+
 class LoadingScreen(Screen):
     pass
 
+
 class MainMenuScreen(Screen):
     pass
+
 
 class ValidateLocationsScreen(Screen):
     def on_kv_post(self, *largs):
@@ -142,6 +152,9 @@ class ValidateLocationsScreen(Screen):
 
                 if str(city_lat) == self.ids.lat.text and str(city_lon) == self.ids.lon.text and str(city_country) == self.ids.country.text:
                     show_validated_popup(self, "Information Validated", "The city has been validated")
+                elif str(city_lat) == self.ids.lat.text and str(city_lon) == self.ids.lon.text and str(
+                        city_country) == self.ids.country.text:
+                    show_choose_popup(self, "Information Validated", "The city has been validated", "")
                 else:
                     data_info = f"Database Info:\nName: {self.ids.ac_name.text}, Country: {self.ids.country.text}\nLat: {self.ids.lat.text}, Lon: {self.ids.lon.text}"
                     new_info = f"New Info:\nName: {self.ids.ac_name.text}, Country: {city_country}\nLat: {city_lat}, Lon: {city_lon}"
@@ -166,16 +179,74 @@ class ValidateLocationsScreen(Screen):
         self.ids.lat.text = ""
         self.ids.lon.text = ""
 
+
 class UpdateRatingsScreen(Screen):
     pass
 
+
+def calculate_distance(location1, location2):
+    R = 6371
+    lat1, lon1 = location1['latitude'], location1['longitude']
+    lat2, lon2 = location2['latitude'], location2['longitude']
+    d = math.acos(math.sin(math.radians(lat1)) * math.sin(math.radians(lat2)) +
+                  math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+                  math.cos(math.radians(lon2 - lon1))) * R
+    return d
+
+
 class PrepareItineraryScreen(Screen):
-    pass
+    current_location = StringProperty('Lincoln, Nebraska')
+    days_into_journey = NumericProperty(0)
+
+    def update_info(self, location, day):
+        self.current_location = location
+
+        self.days_into_journey = day
+
+    def city_with_most_activities(self):
+        pass
+
+    def city_farthest_away(self):
+        pass
+
+    def city_in_range(self, cities, current_location):
+        cites = []
+        for city in cities:
+            for location in city:
+                if self._calculate_distance(current_location, location) < 15000:
+                    return True
+                else:
+                    return False
+
+
+def generate_itinerary_2(self, current_location, past_travel_data):
+    itinerary = [past_travel_data]
+    next_location = self.city_with_most_activities()
+    arrival_date = datetime.now() + timedelta(days=1)
+    itinerary.append({'from': current_location['name'], 'to': next_location['name'], 'departure_date': datetime.now(),
+                      'arrival_date': arrival_date})
+    return itinerary
+
+
+def generate_itinerary_1(self, current_location, past_travel_data):
+    itinerary = [past_travel_data]
+    next_location = self.city_farthest_away()
+    arrival_date = datetime.now() + timedelta(days=1)
+    itinerary.append({'from': current_location['name'], 'to': next_location['name'],
+                      'departure_date': datetime.now(), 'arrival_date': arrival_date})
+    return itinerary
+
+
+class ReviewItineraryScreen(Screen):
+    itinerary_1 = generate_itinerary_1(current_location, past_travel_data)
+    itinerary_2 = generate_itinerary_2(current_location, past_travel_data)
+
 
 class TravelPlannerApp(App):
 
     def build(self):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
+
 
 if __name__ == '__main__':
     parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

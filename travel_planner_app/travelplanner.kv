@@ -7,9 +7,15 @@
             size: self.size
             pos: self.pos
 
-<DataLabel@Label+BackgroundColor>
+<DataLabel@Label>:
     background_color: 0, 0, 0, 0
     color: 0, 0, 0, 0
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
 
 ScreenManager:
     StartUpScreen:
@@ -18,6 +24,7 @@ ScreenManager:
     ValidateLocationsScreen:
     UpdateRatingsScreen:
     PrepareItineraryScreen:
+    ReviewItineraryScreen:
 
 <StartUpScreen>:
     name: 'startup'
@@ -350,7 +357,8 @@ ScreenManager:
                 size_hint: (1, None)
                 size: (0, 750)
                 DataLabel:
-                    text: 'Current Location: text\n\nNumber of Days: 0'
+                    id: location_day_id
+                    text: 'Current Location:' + root.current_location + '\nNumber of Days:' + str(root.days_into_journey)
                     font_size: '18sp'
                     background_color: (1,1,1,1)
                     color: (0,0,0,1)
@@ -365,11 +373,13 @@ ScreenManager:
                     size: (0, 125)
                     on_press: root.update_itinerary()
                 Button:
-                    text: 'Confirm Updated Itinerary'
+                    text: 'Select Updated Itinerary'
                     font_size: '18sp'
                     size_hint: (1, None)
                     size: (0, 125)
-                    on_press: root.confirm_itinerary()
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'ReviewItineraryScreen'
                 Button:
                     text: 'Back to Main'
                     font_size: '18sp'
@@ -379,3 +389,47 @@ ScreenManager:
                     on_press:
                         app.root.transition.direction = 'right'
                         app.root.current = 'MainMenuScreen'
+<ReviewItineraryScreen>:
+    name: 'ReviewItineraryScreen'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: (20,40,20,40)
+            size_hint: (1, None)
+            size: (0, 750)
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Proposed Itineraries:'
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Itinerary 1'
+                    font_size: '16sp'
+                    on_press:
+                        root.select_itinerary(1)
+                Label:
+                    id: itinerary1
+                    text: root.itinerary_1
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Itinerary 2'
+                    font_size: '16sp'
+                    on_press:
+                        root.select_itinerary(2)
+                Label:
+                    id: itinerary1
+                    text: root.itinerary_2
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
+                Button:
+                    text: 'Back'
+                    font_size: '16sp'
+                    on_press:
+                        app.root.transition.direction = 'left'
+                        app.root.current = 'PrepareItineraryScreen'

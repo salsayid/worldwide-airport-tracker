@@ -6,9 +6,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 import sys, os
 from sys import stderr
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from installer.database import FinalDatabase, Forecast, Operator, Venue
 from first_tracking_app.package_main import SubmitReviewScreen
+
 
 def setup():
     try:
@@ -21,25 +23,26 @@ def setup():
         add_starter_data(session)
         session.commit()
         print('Records created.')
-    
+
     except SQLAlchemyError as e:
         print('Database setup failed!', file=stderr)
         print(f'Cause: {e}', file=stderr)
         exit(1)
 
+
 def add_starter_data(session):
-    #Package Deal App
+    # Package Deal App
     operator1 = Operator(name='Test Jeffery Danger', average_rating=5)
     session.add(operator1)
 
     operator2 = Operator(name='Test Stephan Hawkson', average_rating=5, reviews='3,4,5,6,7')
     session.add(operator2)
-    
+
     operator3 = Operator(name='Test John Doe', average_rating=5, reviews='3,4,5,6,7')
     session.add(operator3)
 
     restaurant = Venue(name=' Test Indoor Restaurant', latitude='40.8207', longitude='-96.7005',
-                    type='Indoor Restaurant', operators=[operator1])
+                       type='Indoor Restaurant', operators=[operator1])
     session.add(restaurant)
 
     theater = Venue(name='Test Indoor Theater', latitude='40.8207', longitude='-96.7005', type='Indoor Theater',
@@ -47,7 +50,7 @@ def add_starter_data(session):
     session.add(theater)
 
     sports_arena = Venue(name='Test Indoor Sports Arena', latitude='40.8207', longitude='-96.7005',
-                        type='Indoor Sports Arena', operators=[operator2])
+                         type='Indoor Sports Arena', operators=[operator2])
     session.add(sports_arena)
 
     forecast1 = Forecast(date=datetime(2021, 1, 1), forecastData='Sunny', venueID=1)
@@ -67,6 +70,7 @@ def add_starter_data(session):
 
     forecast6 = Forecast(date=datetime(2021, 1, 6), forecastData='Cloudy', venueID=3)
     session.add(forecast6)
+
 
 class TestSubmitReviewScreen(unittest.TestCase):
     @patch('first_tracking_app.package_main.session')
@@ -90,9 +94,7 @@ class TestSubmitReviewScreen(unittest.TestCase):
         self.assertEqual(screen.ids['existing_operator_name'].text, "Existing Operator's Name")
         self.assertEqual(screen.ids['operator_review'].text, '')
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     setup()
     unittest.main()
-    
-    
