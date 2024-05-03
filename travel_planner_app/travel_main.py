@@ -2,8 +2,6 @@ import math
 import os
 import csv
 import time
-from datetime import datetime, timedelta
-
 import requests
 from kivy.app import App
 from kivy.core.window import Window
@@ -16,7 +14,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from sqlalchemy.exc import SQLAlchemyError
 
-from database import FinalDatabase, City, Airport, Operator, Venue
+from database import FinalDatabase, City, Airport, Operator, Venue, Forecast
 
 api_key = None
 url = None
@@ -32,6 +30,9 @@ operator_names = []
 operator_scores = []
 venue_names = []
 venue_scores = []
+venue_types = []
+forecast_dates = []
+forecast_data = []
 city_country = None
 city_lat = 0
 city_lon = 0
@@ -41,6 +42,7 @@ city_num = 0
 airport_num = 0
 operator_num = 0
 venue_num = 0
+
 
 def show_choose_popup(self, happened, message1, message2):
     content = BoxLayout(orientation='vertical')
@@ -60,6 +62,7 @@ def show_choose_popup(self, happened, message1, message2):
     close_button.bind(on_release=popup.dismiss)
     popup.open()
 
+
 def show_validated_popup(self, happened, message1):
     content = BoxLayout(orientation='vertical')
     database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
@@ -70,6 +73,7 @@ def show_validated_popup(self, happened, message1):
     close_button.bind(on_release=popup.dismiss)
     popup.open()
 
+
 def show_fail_popup(self, happened, message1):
     content = BoxLayout(orientation='vertical')
     database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
@@ -79,6 +83,7 @@ def show_fail_popup(self, happened, message1):
     popup = Popup(title=happened, content=content, size_hint=(1, 1), size=(400, 200))
     close_button.bind(on_release=popup.dismiss)
     popup.open()
+
 
 class StartUpScreen(Screen):
     def submit_credentials(self):
@@ -112,6 +117,13 @@ class StartUpScreen(Screen):
             for venue in venue_query:
                 venue_names.append(venue.name)
                 venue_scores.append(venue.average_rating)
+                venue_types.append(venue.type)
+
+            forecast_query = session.query(Forecast).all()
+            for forecast in forecast_query:
+                forecast_dates.append(forecast.date)
+                forecast_data.append(forecast.forecastData)
+
             print("connection")
         except SQLAlchemyError:
             print("no connection")
@@ -132,18 +144,20 @@ class LoadingScreen(Screen):
         time.sleep(2.5)
         self.manager.current = 'MainMenuScreen'
 
+
 class MainMenuScreen(Screen):
     def on_pre_enter(self):
         global city_num, airport_num, operator_num, venue_num
         string = f"Needing Validation:\n\nCities: {city_num}\nAirports: {airport_num}\n\nNeeding Updating:\n\nOperators: {operator_num}\nVenues: {venue_num}"
         self.ids.needing_validation.text = string
 
+
 class ValidateLocationsScreen(Screen):
     def on_pre_enter(self):
         global city_names, airport_names
         string = "Needing Validation:\n\nCities: "
         for i in range(len(city_names)):
-            if i != len(city_names)-1:
+            if i != len(city_names) - 1:
                 string += f"{city_names[i]}, "
             else:
                 string += f"{city_names[i]}"
@@ -235,6 +249,7 @@ class ValidateLocationsScreen(Screen):
 class UpdateRatingsScreen(Screen):
     pass
 
+
 def calculate_distance(location1, location2):
     R = 6371
     lat1, lon1 = location1['latitude'], location1['longitude']
@@ -244,11 +259,14 @@ def calculate_distance(location1, location2):
                   math.cos(math.radians(lon2 - lon1))) * R
     return d
 
+
 def city_with_most_activities_main(self):
     pass
 
+
 def city_farthest_away_main(self):
     pass
+
 
 class PrepareItineraryScreen(Screen):
     """current_location = StringProperty('Lincoln, Nebraska')
