@@ -28,7 +28,7 @@ city_country = None
 city_lat = 0
 city_lon = 0
 
-def show_popup(self, happened, message1, message2):
+def show_choose_popup(self, happened, message1, message2):
     content = BoxLayout(orientation='vertical')
     database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
     new_info = Label(text=message2, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
@@ -39,6 +39,26 @@ def show_popup(self, happened, message1, message2):
     content.add_widget(new_info)
     content.add_widget(select_database)
     content.add_widget(select_new)
+    content.add_widget(close_button)
+    popup = Popup(title=happened, content=content, size_hint=(1, 1), size=(400, 200))
+    close_button.bind(on_release=popup.dismiss)
+    popup.open()
+
+def show_validated_popup(self, happened, message1):
+    content = BoxLayout(orientation='vertical')
+    database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
+    close_button = Button(text='Close', size_hint=(1, 0.2))
+    content.add_widget(database_info)
+    content.add_widget(close_button)
+    popup = Popup(title=happened, content=content, size_hint=(1, 1), size=(400, 200))
+    close_button.bind(on_release=popup.dismiss)
+    popup.open()
+
+def show_fail_popup(self, happened, message1):
+    content = BoxLayout(orientation='vertical')
+    database_info = Label(text=message1, font_size=50, size_hint=(1, 0.8), text_size=(400, None), halign='center', valign='middle')
+    close_button = Button(text='Close', size_hint=(1, 0.2))
+    content.add_widget(database_info)
     content.add_widget(close_button)
     popup = Popup(title=happened, content=content, size_hint=(1, 1), size=(400, 200))
     close_button.bind(on_release=popup.dismiss)
@@ -77,6 +97,9 @@ class MainMenuScreen(Screen):
     pass
 
 class ValidateLocationsScreen(Screen):
+    def on_kv_post(self, *largs):
+        self.ids.validate_list.text = "test"
+
     def save_new_info(self):
         global city_country, city_lon, city_lat
         city_query = session.query(City).filter(City.name == self.ids.ac_name.text).one()
@@ -118,13 +141,13 @@ class ValidateLocationsScreen(Screen):
                 city_country = openweather_data[0]['country']
 
                 if str(city_lat) == self.ids.lat.text and str(city_lon) == self.ids.lon.text and str(city_country) == self.ids.country.text:
-                    show_popup(self, "Information Validated", "The city has been validated", "")
+                    show_validated_popup(self, "Information Validated", "The city has been validated")
                 else:
                     data_info = f"Database Info:\nName: {self.ids.ac_name.text}, Country: {self.ids.country.text}\nLat: {self.ids.lat.text}, Lon: {self.ids.lon.text}"
                     new_info = f"New Info:\nName: {self.ids.ac_name.text}, Country: {city_country}\nLat: {city_lat}, Lon: {city_lon}"
-                    show_popup(self, "Choose Correct Information", data_info, new_info)
+                    show_choose_popup(self, "Choose Correct Information", data_info, new_info)
             else:
-                show_popup(self, "Failure", "City cannot be validated", "Please select a different city")
+                show_fail_popup(self, "Failure", "City cannot be validated")
         elif self.ids.country.text == "":
             location = list(filter(lambda code: code['ICAO'] == self.ids.icao_code.text, data))
             dictionary = location[0]
