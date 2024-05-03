@@ -1,6 +1,7 @@
 import math
 import os
 import csv
+import time
 from datetime import datetime, timedelta
 
 import requests
@@ -15,7 +16,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from sqlalchemy.exc import SQLAlchemyError
 
-from database import FinalDatabase, City, Airport
+from database import FinalDatabase, City, Airport, Operator, Venue
 
 api_key = None
 url = None
@@ -27,11 +28,19 @@ city_coords = []
 airport_names = []
 airport_codes = []
 airport_coords = []
+operator_names = []
+operator_scores = []
+venue_names = []
+venue_scores = []
 city_country = None
 city_lat = 0
 city_lon = 0
 current_location = ''
 past_travel_data = ''
+city_num = 0
+airport_num = 0
+operator_num = 0
+venue_num = 0
 
 def show_choose_popup(self, happened, message1, message2):
     content = BoxLayout(orientation='vertical')
@@ -74,7 +83,7 @@ def show_fail_popup(self, happened, message1):
 class StartUpScreen(Screen):
     def submit_credentials(self):
         try:
-            global url, operator_database, session, api_key, cities
+            global url, operator_database, session, api_key
             url = FinalDatabase.construct_mysql_url(self.ids.authority.text, int(self.ids.port_number.text),
                                                     self.ids.database_name.text, self.ids.database_username.text,
                                                     self.ids.database_password.text)
@@ -93,22 +102,58 @@ class StartUpScreen(Screen):
                 airport_names.append(airport.name)
                 airport_codes.append(airport.icao_code)
                 airport_coords.append(airport.location)
+
+            operator_query = session.query(Operator).all()
+            for operator in operator_query:
+                operator_names.append(operator.name)
+                operator_scores.append(operator.average_rating)
+
+            venue_query = session.query(Venue).all()
+            for venue in venue_query:
+                venue_names.append(venue.name)
+                venue_scores.append(venue.average_rating)
             print("connection")
         except SQLAlchemyError:
             print("no connection")
 
 
 class LoadingScreen(Screen):
-    pass
+    def on_enter(self):
+        global city_num, airport_num, operator_num, venue_num
+        for i in range(len(city_names)):
+            city_num += 1
+        for j in range(len(airport_names)):
+            airport_num += 1
+        for y in range(len(operator_names)):
+            operator_num += 1
+        for z in range(len(venue_names)):
+            venue_num += 1
 
+        time.sleep(2.5)
+        self.manager.current = 'MainMenuScreen'
 
 class MainMenuScreen(Screen):
-    pass
-
+    def on_pre_enter(self):
+        global city_num, airport_num, operator_num, venue_num
+        string = f"Needing Validation:\n\nCities: {city_num}\nAirports: {airport_num}\n\nNeeding Updating:\n\nOperators: {operator_num}\nVenues: {venue_num}"
+        self.ids.needing_validation.text = string
 
 class ValidateLocationsScreen(Screen):
-    def on_kv_post(self, *largs):
-        self.ids.validate_list.text = "test"
+    def on_pre_enter(self):
+        global city_names, airport_names
+        string = "Needing Validation:\n\nCities: "
+        for i in range(len(city_names)):
+            if i != len(city_names)-1:
+                string += f"{city_names[i]}, "
+            else:
+                string += f"{city_names[i]}"
+        string += "\nAirports: "
+        for j in range(len(airport_names)):
+            if j != len(airport_names) - 1:
+                string += f"{airport_names[j]}, "
+            else:
+                string += f"{airport_names[j]}"
+        self.ids.validate_list.text = string
 
     def save_new_info(self):
         global city_country, city_lon, city_lat
@@ -152,9 +197,6 @@ class ValidateLocationsScreen(Screen):
 
                 if str(city_lat) == self.ids.lat.text and str(city_lon) == self.ids.lon.text and str(city_country) == self.ids.country.text:
                     show_validated_popup(self, "Information Validated", "The city has been validated")
-                elif str(city_lat) == self.ids.lat.text and str(city_lon) == self.ids.lon.text and str(
-                        city_country) == self.ids.country.text:
-                    show_choose_popup(self, "Information Validated", "The city has been validated", "")
                 else:
                     data_info = f"Database Info:\nName: {self.ids.ac_name.text}, Country: {self.ids.country.text}\nLat: {self.ids.lat.text}, Lon: {self.ids.lon.text}"
                     new_info = f"New Info:\nName: {self.ids.ac_name.text}, Country: {city_country}\nLat: {city_lat}, Lon: {city_lon}"
@@ -163,12 +205,22 @@ class ValidateLocationsScreen(Screen):
                 show_fail_popup(self, "Failure", "City cannot be validated")
         elif self.ids.country.text == "":
             location = list(filter(lambda code: code['ICAO'] == self.ids.icao_code.text, data))
-            dictionary = location[0]
-            icao = dictionary['ICAO']
-            name = dictionary['Name']
-            country = dictionary['Country']
-            latitude = dictionary['Latitude']
-            longitude = dictionary['Longitude']
+
+            if location:
+                dictionary = location[0]
+                icao = dictionary['ICAO']
+                name = dictionary['Name']
+                latitude = dictionary['Latitude']
+                longitude = dictionary['Longitude']
+
+                if str(icao) == self.ids.icao_code.text and str(name) == self.ids.ac_name.text and str(latitude) == self.ids.lat.text and str(longitude) == self.ids.lon.text:
+                    show_validated_popup(self, "Information Validated", "The airport has been validated")
+                else:
+                    data_info = f"Database Info:\nICAO Code: {self.ids.icao_code.text}, Name: {self.ids.ac_name.text},\nLat: {self.ids.lat.text}, Lon: {self.ids.lon.text}"
+                    new_info = f"New Info:\nICAO Code: {icao}, Name: {self.ids.ac_name.text},\nLat: {latitude}, Lon: {longitude}"
+                    show_choose_popup(self, "Choose Correct Information", data_info, new_info)
+            else:
+                show_fail_popup(self, "Failure", "Airport cannot be validated")
 
     def refresh(self):
         self.ids.city_spinner.values = city_names
@@ -182,7 +234,6 @@ class ValidateLocationsScreen(Screen):
 
 class UpdateRatingsScreen(Screen):
     pass
-
 
 def calculate_distance(location1, location2):
     R = 6371
@@ -200,7 +251,7 @@ def city_farthest_away_main(self):
     pass
 
 class PrepareItineraryScreen(Screen):
-    current_location = StringProperty('Lincoln, Nebraska')
+    """current_location = StringProperty('Lincoln, Nebraska')
     days_into_journey = NumericProperty(0)
 
     def update_info(self, location, day):
@@ -221,32 +272,36 @@ class PrepareItineraryScreen(Screen):
                 if self._calculate_distance(current_location, location) < 15000:
                     return True
                 else:
-                    return False
+                    return False"""
+    pass
 
 
 def generate_itinerary_2(self, current_location, past_travel_data):
-    itinerary = [past_travel_data]
+    """itinerary = [past_travel_data]
     next_location = city_with_most_activities_main(self)
     arrival_date = datetime.now() + timedelta(days=1)
     itinerary.append({'from': current_location['name'], 'to': next_location['name'], 'departure_date': datetime.now(),
                       'arrival_date': arrival_date})
-    return itinerary
+    return itinerary"""
+    pass
 
 
 def generate_itinerary_1(self, current_location, past_travel_data):
-    itinerary = [past_travel_data]
+    """itinerary = [past_travel_data]
     next_location = city_farthest_away_main(self)
     arrival_date = datetime.now() + timedelta(days=1)
     itinerary.append({'from': current_location['name'], 'to': next_location['name'],
                       'departure_date': datetime.now(), 'arrival_date': arrival_date})
-    return itinerary
+    return itinerary"""
+    pass
 
 
 class ReviewItineraryScreen(Screen):
-    def __init__(self,**kwargs):
+    """def __init__(self,**kwargs):
         super().__init__(**kwargs)
         itinerary_1 = generate_itinerary_1(self,current_location, past_travel_data)
-        itinerary_2 = generate_itinerary_2(self,current_location, past_travel_data)
+        itinerary_2 = generate_itinerary_2(self,current_location, past_travel_data)"""
+    pass
 
 
 class TravelPlannerApp(App):
