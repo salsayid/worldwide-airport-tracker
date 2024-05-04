@@ -407,14 +407,23 @@ ScreenManager:
                     font_size: '18sp'
                     size_hint_y: None
                     height: '30dp'
+                Label:
+                    id: itinerary1
+                    text: 'No itinerary 1 currently'
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
                 Button:
                     text: 'Itinerary 1'
                     font_size: '16sp'
                     on_press:
                         root.select_itinerary(1)
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
+
                 Label:
-                    id: itinerary1
-                    text: root.itinerary_1
+                    id: itinerary2
+                    text: 'No itinerary 2 currently'
                     font_size: '18sp'
                     size_hint_y: None
                     height: '30dp'
@@ -423,12 +432,8 @@ ScreenManager:
                     font_size: '16sp'
                     on_press:
                         root.select_itinerary(2)
-                Label:
-                    id: itinerary1
-                    text: root.itinerary_2
-                    font_size: '18sp'
-                    size_hint_y: None
-                    height: '30dp'
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
                 Button:
                     text: 'Back'
                     font_size: '16sp'
