@@ -53,9 +53,7 @@ class NewVenueScreen(Screen):
                 show_popup(self, 'Failed', 'Failed to create new venue!\nCause: Venue with the same name, location, and type already exists.')
             else:
                 try:
-                    new_venue = Venue(name=venue_name, latitude=venue_lat, longitude=venue_lon, type=venue_type)
-                    session.add(new_venue)
-                    session.commit()
+                    self.create_venue(venue_name, venue_lat, venue_lon, venue_type)
                 except SQLAlchemyError as exception:
                     show_popup(self, 'Failed', f'Failed to create new venue!\nCause: {exception}')
                 else:
@@ -70,6 +68,12 @@ class NewVenueScreen(Screen):
         self.ids.venue_lat.text = ''
         self.ids.venue_lon.text = ''
         self.ids.venue_type.text = 'Type Of Venue'
+
+    #TODO Test
+    def create_venue(self, name, latitude, longitude, type):
+        venue = Venue(name=name, latitude=latitude, longitude=longitude, type=type)
+        session.add(venue)
+        session.commit()
 
 class AddEditOperatorScreen(Screen):
     pass
@@ -87,9 +91,7 @@ class AddOperatorScreen(Screen):
                 show_popup(self, 'Failed', f'Failed to create new operator!\nCause: Operator with the same name already exists.')
             else:
                 try:
-                    new_operator = Operator(name=operator_name, average_rating=operator_rating)
-                    session.add(new_operator)
-                    session.commit()
+                    self.create_operator(operator_name, operator_rating)
                 except SQLAlchemyError as exception:
                     show_popup(self, 'Failed', f'Failed to create new operator!\nCause: {exception}')
                 else:
@@ -100,6 +102,12 @@ class AddOperatorScreen(Screen):
     def clearAddOperatorFields(self):
         self.ids.operator_name.text = ''
         self.ids.operator_rating.text = ''
+    
+    #TODO Test
+    def create_operator(self, name, rating):
+        operator = Operator(name=name, average_rating=rating)
+        session.add(operator)
+        session.commit()
 
 class EditOperatorScreen(Screen):
     def editExistingOperator(self):
@@ -115,6 +123,8 @@ class EditOperatorScreen(Screen):
                 show_popup(self, 'Failed', f'Failed to edit operator!\nCause: Operator does not exist.')
             else:
                 try:
+                    self.edit_operator(existing_operator, new_operator_name, operator_rating)
+                    
                     existing_operator.name = new_operator_name
                     existing_operator.average_rating = operator_rating
                     session.commit()
@@ -134,7 +144,6 @@ class EditOperatorScreen(Screen):
             operator_names.append(operator.name)
         return operator_names
     
-    
     def updateSpinner(self):
         self.ids.existing_operator_name.values = self.getOperatorNames()
 
@@ -142,8 +151,13 @@ class EditOperatorScreen(Screen):
         self.ids.existing_operator_name.text = "Existing Operator's Name"
         self.ids.new_operator_name.text = ''
         self.ids.new_operator_rating.text = ''
+        
+    #TODO Test
+    def edit_operator(self, existing_operator, new_operator_name, operator_rating):
+        existing_operator.name = new_operator_name
+        existing_operator.average_rating = operator_rating
+        session.commit()
 
-#TODO
 class CheckForecastScreen(Screen):
     def getVenueNames(self):
         venue_names = []
@@ -158,7 +172,7 @@ class CheckForecastScreen(Screen):
 
     def generateNext7Days(self):
         today = date.today()
-        print(today)
+        #print(today)
         next_5_days = [today + timedelta(days=i) for i in range(0, 5)]
         date_formatted_5_days = []
         for day in next_5_days:
@@ -177,7 +191,7 @@ class CheckForecastScreen(Screen):
                 credential_information = json.load(file)
             api_key = credential_information['API_KEY']
         except FileNotFoundError:
-            print('Could not find credentials.json file!', file=stderr)
+            show_popup(self, 'Failed', 'Could not find credentials.json file!')
             exit(1)
 
 
@@ -217,7 +231,7 @@ class CheckForecastScreen(Screen):
                     
                 existing_venue = session.query(Venue).filter_by(name=current_venue.name).first()
             except SQLAlchemyError as exception:
-                    show_popup(self, 'Failed', f'Failed to add venue review!\nCause: {exception}')
+                    show_popup(self, 'Failed', f'Failed to get venue information!\nCause: {exception}')
                 
             lat = existing_venue.latitude
             long = existing_venue.longitude
@@ -228,25 +242,23 @@ class CheckForecastScreen(Screen):
                 show_popup(self, 'No Information', 'The selected time does not have any weather information.')
             else:
                 show_popup(self, 'Weather Result', f'The weather for the selected time is: {weather_result}')
-                self.save_to_database(current_venue, weather_result)
+                self.save_to_database(current_venue, weather_result, self.ids.date_for_forecast.text)
                 
         
         except Exception as e:
             show_popup(self, 'Failed', f'Failed to get venue location!\nCause: {e}')
     
 
-
-    def save_to_database(self, current_venue, weather_result):
+    #TODO Test
+    def save_to_database(self, current_venue, weather_result, date):
         try:
-            new_forecast = Forecast(date=self.ids.date_for_forecast.text, forecastData=weather_result, venueID=current_venue.venueID)
-            session.add(new_forecast)
+            forecast = Forecast(date=date, forecastData=weather_result, venueID=current_venue.venueID)
+            session.add(forecast)
             session.commit()
         except SQLAlchemyError as exception:
             show_popup(self, 'Failed', f'Failed to save forecast to database!\nCause: {exception}')
         else:
             show_popup(self, 'Success', 'Forecast saved to database!')
-            
-            
             
 
 class SubmitReviewScreen(Screen):
@@ -287,19 +299,19 @@ class SubmitReviewScreen(Screen):
                 try:
                     existing_operator = session.query(Operator).filter_by(name=operator_name).first()
                     
-                    if existing_operator.reviews is not None:
-                        review_list = existing_operator.reviews.split(',')
+                    if existing_operator.num_reviews is not None:
+                        review_list = existing_operator.num_reviews.split(',')
                         review_list.append(operator_review)
-                        existing_operator.reviews = ','.join(review_list)
+                        existing_operator.num_reviews = ','.join(review_list)
                         
                         average_rating = 0
                         for review in review_list:
                             average_rating += int(review[0])
-                            print (average_rating)
+                            #print (average_rating)
                             
                         existing_operator.average_rating = average_rating / len(review_list)
                     else:
-                        existing_operator.reviews = operator_review
+                        existing_operator.num_reviews = operator_review
                     session.commit()
                 except SQLAlchemyError as exception:
                     show_popup(self, 'Failed', f'Failed to add operator review!\nCause: {exception}')
@@ -340,7 +352,7 @@ class SubmitReviewScreen(Screen):
                         average_rating = 0
                         for review in review_list:
                             average_rating += int(review[0])
-                            print (average_rating)
+                            #print (average_rating)
                             
                         existing_venue.average_rating = average_rating / len(review_list)
                     else:
