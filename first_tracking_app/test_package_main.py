@@ -9,7 +9,7 @@ from sys import stderr
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from installer.database import FinalDatabase, Forecast, Operator, Venue
-from first_tracking_app.package_main import SubmitReviewScreen
+from first_tracking_app.package_main import NewVenueScreen, EditOperatorScreen, AddOperatorScreen, CheckForecastScreen, SubmitReviewScreen
 
 
 def setup():
@@ -17,12 +17,13 @@ def setup():
         url = FinalDatabase.construct_in_memory_url()
         test_db = FinalDatabase(url)
         test_db.drop_all_tables()
-        test_db.ensure_package_deal_tables_exist()
+        test_db.ensure_tables_exist()
         print('Tables created.')
         session = test_db.create_session()
-        add_starter_data(session)
+        #add_starter_data(session)
         session.commit()
         print('Records created.')
+        return session
 
     except SQLAlchemyError as e:
         print('Database setup failed!', file=stderr)
@@ -72,29 +73,24 @@ def add_starter_data(session):
     session.add(forecast6)
 
 
-class TestSubmitReviewScreen(unittest.TestCase):
-    @patch('first_tracking_app.package_main.session')
-    @patch('first_tracking_app.package_main.show_popup')
-    def test_addOperatorReview(self, mock_show_popup, mock_session):
+class TestPackageMain(unittest.TestCase):
+    
+    def test_add_new_venue(self):
         # Arrange
-        screen = SubmitReviewScreen()
-        screen.ids = {
-            'existing_operator_name': MagicMock(text='Test Operator'),
-            'operator_review': MagicMock(text='5')
-        }
-        mock_operator = MagicMock(reviews=None)
-        mock_session.query().filter_by().first.return_value = mock_operator
+        session = setup()
+        venue_name = 'Test Venue'
+        venue_lat = '40.8207'
+        venue_lon = '-96.7005'
+        venue_type = 'Indoor Restaurant'
 
         # Act
-        screen.addOperatorReview()
-
+        NewVenueScreen.create_venue(self, venue_name, venue_lat, venue_lon, venue_type)
+        
         # Assert
-        mock_session.commit.assert_called_once()
-        mock_show_popup.assert_called_once_with(screen, 'Success', 'Operator review added!')
-        self.assertEqual(screen.ids['existing_operator_name'].text, "Existing Operator's Name")
-        self.assertEqual(screen.ids['operator_review'].text, '')
+        existing_venue = session.query(Venue).filter_by(name=venue_name, latitude=venue_lat, longitude=venue_lon, type=venue_type).first()
+        self.assertIsNotNone(existing_venue)
 
 
 if __name__ == '__main__':
-    setup()
+    #session = setup()
     unittest.main()
