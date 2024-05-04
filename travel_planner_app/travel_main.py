@@ -14,7 +14,9 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
+from pygments.lexers import data
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.util import NoneType
 
 from database import FinalDatabase, City, Airport, Operator, Venue, Forecast
 
@@ -44,8 +46,13 @@ forecast_data = []
 city_country = None
 city_lat = 0
 city_lon = 0
-current_location = ''
+current_location = StringProperty('Lincoln, Nebraska')
+days_into_journey = 0
+current_location_coordinate = '40.7128, -74.0060'
 past_travel_data = ''
+cities_in_range = []
+itinerary_1 = 'itinerary_1'
+itinerary_2 = 'itinerary_2'
 city_num = 0
 airport_num = 0
 operator_num = 0
@@ -174,7 +181,8 @@ class MainMenuScreen(Screen):
         App.get_running_app().stop()
 
     def advance_calender(self):
-        pass
+        self.days_into_journey = days_into_journey + 1
+        self.ids.location_day_id.text = 'Current Location:' + str(current_location) + '\nNumber of Days:' + str(days_into_journey)
 
 
 class ValidateLocationsScreen(Screen):
@@ -345,74 +353,92 @@ class UpdateRatingsScreen(Screen):
 
 def calculate_distance(location1, location2):
     R = 6371
-    lat1, lon1 = location1['latitude'], location1['longitude']
-    lat2, lon2 = location2['latitude'], location2['longitude']
+    lat1, lon1 = map(float, location1.split(','))
+    lat2, lon2 = map(float, location2.split(','))
+
     d = math.acos(math.sin(math.radians(lat1)) * math.sin(math.radians(lat2)) +
                   math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
                   math.cos(math.radians(lon2 - lon1))) * R
     return d
 
 
-def city_with_most_activities_main(self):
-    pass
+def city_in_range():
+    distance_max = 4000
+    for name, coordinate in zip(city_names, city_coords):
+        if all(calculate_distance(current_location_coordinate, coord) < distance_max
+               for coord in city_coords):
+            cities_in_range[name] = coordinate
+    return cities_in_range
 
 
-def city_farthest_away_main(self):
-    pass
+def city_with_most_activities():
+    in_range = city_in_range()
+    activities_city = None
+    max_activities = 0
+    for name, venue_names in in_range:
+        activities = 0
+        if activities > max_activities:
+            max_activities = activities
+            activities_city = name, venue_names
+    return activities_city
+
+
+def city_farthest_away():
+    in_range = city_in_range()
+    farthest_city = None
+    max_distance = 0
+    for name, coordinate in in_range:
+        distance = calculate_distance(current_location_coordinate, coordinate)
+        if distance > max_distance:
+            max_distance = distance
+            farthest_city = name, coordinate
+    return farthest_city
+
+
+def generate_itinerary_1(self):
+    itinerary = [past_travel_data]
+    next_location = city_with_most_activities()
+    departure_date = datetime.now() + timedelta(days=self.days_into_journey)
+    arrival_date = departure_date + timedelta(days=1)
+    if self.current_location or next_location[0] is NoneType:
+        return 'No itinerary can be created'
+    itinerary.append({'From': self.current_location, 'to': next_location[0],
+                      'departure_date': departure_date, 'arrival_date': arrival_date})
+    return itinerary
+
+
+def generate_itinerary_2(self):
+    itinerary = [past_travel_data]
+    next_location = city_farthest_away()
+    departure_date = datetime.now() + timedelta(days=self.days_into_journey)
+    arrival_date = departure_date + timedelta(days=1)
+    if self.current_location or next_location[0] is NoneType:
+        return 'No itinerary can be created'
+    itinerary.append({'From': self.current_location, 'to': next_location[0],
+                      'departure_date': departure_date, 'arrival_date': arrival_date})
+    return itinerary
 
 
 class PrepareItineraryScreen(Screen):
-    """current_location = StringProperty('Lincoln, Nebraska')
-    days_into_journey = NumericProperty(0)
+    current_location = current_location
+    days_into_journey = days_into_journey
 
-    def update_info(self, location, day):
-        self.current_location = location
-
-        self.days_into_journey = day
-
-    def city_with_most_activities(self):
-        city_with_most_activities_main(self)
-
-    def city_farthest_away(self):
-        city_farthest_away_main(self)
-
-    def city_in_range(self, cities, current_location):
-        cites = []
-        for city in cities:
-            for location in city:
-                if self._calculate_distance(current_location, location) < 15000:
-                    return True
-                else:
-                    return False"""
-    pass
-
-
-def generate_itinerary_2(self, current_location, past_travel_data):
-    """itinerary = [past_travel_data]
-    next_location = city_with_most_activities_main(self)
-    arrival_date = datetime.now() + timedelta(days=1)
-    itinerary.append({'from': current_location['name'], 'to': next_location['name'], 'departure_date': datetime.now(),
-                      'arrival_date': arrival_date})
-    return itinerary"""
-    pass
-
-
-def generate_itinerary_1(self, current_location, past_travel_data):
-    """itinerary = [past_travel_data]
-    next_location = city_farthest_away_main(self)
-    arrival_date = datetime.now() + timedelta(days=1)
-    itinerary.append({'from': current_location['name'], 'to': next_location['name'],
-                      'departure_date': datetime.now(), 'arrival_date': arrival_date})
-    return itinerary"""
-    pass
+    def update_itinerary(self):
+        self.ids.itinerary1.text = generate_itinerary_1(self)
+        self.ids.itinerary2.text = generate_itinerary_2(self)
 
 
 class ReviewItineraryScreen(Screen):
-    """def __init__(self,**kwargs):
-        super().__init__(**kwargs)
-        itinerary_1 = generate_itinerary_1(self,current_location, past_travel_data)
-        itinerary_2 = generate_itinerary_2(self,current_location, past_travel_data)"""
-    pass
+    current_location = current_location
+    days_into_journey = days_into_journey
+
+    def select_itinerary(self, number_itinerary):
+        if number_itinerary is 1:
+            self.past_travel_data.append(generate_itinerary_1(self))
+            self.days_into_journey = days_into_journey + 1
+        else:
+            self.past_travel_data.append(generate_itinerary_2(self))
+            self.days_into_journey = days_into_journey + 1
 
 
 class TravelPlannerApp(App):
