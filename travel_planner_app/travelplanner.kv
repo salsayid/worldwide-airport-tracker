@@ -136,11 +136,8 @@ ScreenManager:
         BoxLayout:
             orientation: 'horizontal'
             Label:
-                text: 'Loading'
-            Button:
-                text: 'Next'
-                font_size: '18sp'
-                on_press: app.root.current = 'MainMenuScreen'
+                text: 'Loading...'
+                font_size: '50sp'
 
 <MainMenuScreen>:
     name: 'MainMenuScreen'
@@ -153,10 +150,12 @@ ScreenManager:
                 padding: (20,40,20,40)
                 DataLabel:
                     id: needing_validation
-                    text: 'Cities needing validation: 0              Airports needing validation: 0\n\n\nOperators needed updating: 0          Venues needing updating: 0'
+                    text: 'Cities needing validation: 0'
                     font_size: '18sp'
                     background_color: (1,1,1,1)
                     color: (0,0,0,1)
+                    valign: "middle"
+                    halign: 'center'
             BoxLayout:
                 orientation: 'vertical'
                 padding: (20,40,20,40)
@@ -215,6 +214,8 @@ ScreenManager:
                     font_size: '18sp'
                     background_color: (1,1,1,1)
                     color: (0,0,0,1)
+                    valign: "middle"
+                    halign: 'center'
             BoxLayout:
                 orientation: 'vertical'
                 padding: (20,40,20,40)
@@ -389,6 +390,7 @@ ScreenManager:
                     on_press:
                         app.root.transition.direction = 'right'
                         app.root.current = 'MainMenuScreen'
+
 <ReviewItineraryScreen>:
     name: 'ReviewItineraryScreen'
     BoxLayout:
@@ -405,14 +407,23 @@ ScreenManager:
                     font_size: '18sp'
                     size_hint_y: None
                     height: '30dp'
+                Label:
+                    id: itinerary1
+                    text: 'No itinerary 1 currently'
+                    font_size: '18sp'
+                    size_hint_y: None
+                    height: '30dp'
                 Button:
                     text: 'Itinerary 1'
                     font_size: '16sp'
                     on_press:
                         root.select_itinerary(1)
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
+
                 Label:
-                    id: itinerary1
-                    text: root.itinerary_1
+                    id: itinerary2
+                    text: 'No itinerary 2 currently'
                     font_size: '18sp'
                     size_hint_y: None
                     height: '30dp'
@@ -421,12 +432,8 @@ ScreenManager:
                     font_size: '16sp'
                     on_press:
                         root.select_itinerary(2)
-                Label:
-                    id: itinerary1
-                    text: root.itinerary_2
-                    font_size: '18sp'
-                    size_hint_y: None
-                    height: '30dp'
+                        app.root.transition.direction = 'right'
+                        app.root.current = 'MainMenuScreen'
                 Button:
                     text: 'Back'
                     font_size: '16sp'

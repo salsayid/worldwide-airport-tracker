@@ -3,7 +3,10 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from datetime import datetime
 from airport import Airport, City, Forecast, AirportDatabase
-import credentials as cred
+from sys import stderr
+import os
+import sys
+import json
 
 class ScreenManagement(ScreenManager):
     pass
@@ -55,14 +58,27 @@ class CheckForecastScreen(Screen):
 
 class AirportApp(App):
     def build(self):
-        url = AirportDatabase.construct_mysql_url('localhost', cred.PORT, cred.DATABASE_NAME, cred.USERNAME, cred.PASSWORD)
-        db = AirportDatabase(url)
-        session = db.create_session()
-        db.ensure_tables_exist()
-
         sm = ScreenManagement()
         sm.session = session
         return sm
 
 if __name__ == '__main__':
+    try:
+        parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        file_path = os.path.join(parent_directory, "installer", "credentials.json")
+        with open(file_path, 'r') as file:
+            credential_information = json.load(file)
+        authority = credential_information['AUTHORITY']
+        port = credential_information['PORT']
+        database_name = credential_information['DATABASE_NAME']
+        username = credential_information['USERNAME']
+        password = credential_information['PASSWORD']
+    except FileNotFoundError:
+        print('Could not find credentials.json file!', file=stderr)
+        exit(1)
+        
+    url = AirportDatabase.construct_mysql_url(authority, port, database_name, username, password)
+    db = AirportDatabase(url)
+    session = db.create_session()
+    
     AirportApp().run()

@@ -147,3 +147,4 @@ class FinalDatabase(object):
         self.session.add(city)
         self.session.commit()
         return city
+
