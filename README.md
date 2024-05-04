@@ -74,6 +74,6 @@ To start the tracking application:
 
 ### Running
 To run the travel planner app, import the project into your IDE of choice and 
-create a new `.py` file titled `credentials.py` and by using the information
-matching with the instructions in the example file, `credentials_example.py`. Then run `installer.py`
+create a new `.json` file titled `credentials.json` and by using the information
+matching with the instructions in the example file, `credentials_example.json`. Then run `installer.py`
 which will set up the tables in your database. After that point, run `travel_main.py` and use the Travel Planner App. 
