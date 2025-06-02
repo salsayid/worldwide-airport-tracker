@@ -392,7 +392,11 @@ if __name__ == '__main__':
     except FileNotFoundError:
         print('Could not find credentials.json file!', file=stderr)
         exit(1)
-    
+        
+Logger.info(f"Creating venue: {venue_name} at {venue_lat}, {venue_lon}")
+Logger.warning(f"Duplicate venue detected: {venue_name}")
+Logger.error(f"Failed to create venue: {exception}")
+
     url = FinalDatabase.construct_mysql_url(authority, port, database_name, username, password)
     package_deal_db = FinalDatabase(url)
     session = package_deal_db.create_session()
