@@ -3,6 +3,14 @@ import os
 import csv
 import time
 from datetime import datetime, timedelta
+import logging
+
+# just setting up basic logging functionality
+logging.basicConfig(level=logging.INFO,
+                    format='[%(asctime)s] %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
+
 
 import requests
 from kivy.app import App
