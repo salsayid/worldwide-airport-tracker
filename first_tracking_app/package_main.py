@@ -36,7 +36,21 @@ def show_popup(self, happened, message):
 
 class MainScreen(Screen):
     def exit_program(self):
-        App.get_running_app().stop()
+        content = BoxLayout(orientation='vertical')
+        label = Label(text='Are you sure you want to exit?', font_size=18)
+        button_layout = BoxLayout(size_hint_y=0.3)
+        yes_button = Button(text='Yes')
+        no_button = Button(text='No')
+        button_layout.add_widget(yes_button)
+        button_layout.add_widget(no_button)
+        content.add_widget(label)
+        content.add_widget(button_layout)
+        popup = Popup(title='Confirm Exit', content=content, size_hint=(None, None), size=(400, 200))
+    
+    yes_button.bind(on_release=lambda *args: App.get_running_app().stop())
+    no_button.bind(on_release=popup.dismiss)
+    
+    popup.open()
 
 class NewVenueScreen(Screen):
     def createNewVenue(self):
