@@ -4,7 +4,10 @@
 
 
 ##### Authors:
-Nathaniel McVay, Sayid Alsayid, Ethen Friedman, James Benton
+
+Lead Programmer - Sayid Alsayid
+
+Contributions from - Ethan Friedman, James Benton, Nathaniel McVay
 
 
 ## Project Components
