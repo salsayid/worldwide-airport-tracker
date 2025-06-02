@@ -1,5 +1,5 @@
 
-# Milestone 2: Travel Planner App
+# Travel Planner App
 
 
 
