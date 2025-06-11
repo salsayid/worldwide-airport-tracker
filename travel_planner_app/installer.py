@@ -13,6 +13,9 @@ def add_starter_data(session):
     operator1.reviews = [review1]
     session.add(operator1)
     session.add(review1)
+    session.add(review2)
+
+    review2 = Reviews(review='He is a decent operator')
 
     operator2 = Operator(name='Test Stephan Hawkson', average_rating=5)
     review2 = Reviews(review='He is a really bad operator')
