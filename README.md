@@ -4,7 +4,7 @@
 
 ##### Authors:
 
-Lead Programmer - Sayid Alsayid
+Sayid Alsayid
 
 Contributions from - Ethan Friedman, James Benton, Nathaniel McVay
 
