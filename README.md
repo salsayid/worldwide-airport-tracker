@@ -4,9 +4,7 @@
 
 ##### Authors:
 
-Sayid Alsayid
-
-Contributions from - Ethan Friedman, James Benton, Nathaniel McVay
+Contributors: Sayid Alsayid, Ethan Friedman, James Benton, Nathaniel McVay
 
 
 ## Project Components
